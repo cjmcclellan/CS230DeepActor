@@ -1,2 +1,7 @@
 # The git ignore file for CS230 Deep Actor
+
+# Virtual environments
 DeepLearning/
+venv/
+
+models/pretrained_facenet/
