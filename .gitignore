@@ -4,4 +4,5 @@
 DeepLearning/
 venv/
 
+# The pretrained models of facenet
 models/pretrained_facenet/
