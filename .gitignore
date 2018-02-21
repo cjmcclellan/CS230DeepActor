@@ -4,4 +4,9 @@
 DeepLearning/
 venv/
 
+# Models
 models/pretrained_facenet/
+
+
+# Jupyter files
+.ipynb_checkpoints
