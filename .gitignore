@@ -4,13 +4,13 @@
 DeepLearning/
 venv/
 
-<<<<<<< HEAD
-# The pretrained models of facenet
-=======
 # Models
->>>>>>> refs/remotes/origin/master
+refs/remotes/origin/master
 models/pretrained_facenet/
 
 
 # Jupyter files
 .ipynb_checkpoints
+
+# PyCharm
+.idea/
