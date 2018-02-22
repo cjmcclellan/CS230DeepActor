@@ -1,0 +1,1 @@
+We found that the Det1, Det2, and Det3 npy files in Facenet are the pretrained Pnet, Rnet, and Onet for face detection.  We should be able to load these into tensorflow and detect faces in images.
