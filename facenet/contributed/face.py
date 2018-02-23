@@ -54,6 +54,7 @@ class Face:
         self.image = None
         self.container_image = None
         self.embedding = None
+        self.points = None
 
 
 class Recognition:
@@ -135,11 +136,12 @@ class Detection:
     def find_faces(self, image):
         faces = []
 
-        bounding_boxes, _ = df.detect_face(image, self.minsize,
+        bounding_boxes, point_lists = df.detect_face(image, self.minsize,
                                                           self.pnet, self.rnet, self.onet,
                                                           self.threshold, self.factor)
-        for bb in bounding_boxes:
+        for i, bb in enumerate(bounding_boxes):
             face = Face()
+            face.points = [point_lists[:5,i],point_lists[5:10,i]]
             face.container_image = image
             face.bounding_box = np.zeros(4, dtype=np.int32)
 
