@@ -19,7 +19,9 @@
 import tensorflow as tf
 import sys
 sys.path.append('../')
+sys.path.append('../facenet/src/align/')
 import facenet.src.align.detect_face as df
+import facenet.contributed.face as face
 
 
 # In[2]:
@@ -46,16 +48,20 @@ onet_path = det_path + 'det3.npy'
 
 # In[4]:
 
-test_path = '../test_data/FaceDetect/BasicFace'
-test_img_orig = imageio.imread(test_path + '/MaleFaceBasic.jpg')
+test_path = '../test_data/FaceDetect/WiderDataset'
+test_img_orig = imageio.imread(test_path + '/4.jpg')
 #plt.imshow(test_img_orig)
 #plt.show()
-test_img = test_img_orig/255.
-plt.imshow(test_img)
-plt.show()
+test_img = test_img_orig
+#plt.imshow(test_img)
+#plt.show()
 print(test_img.shape)
 
-
+FaceDetector = face.Detection()
+face4 = FaceDetector.find_faces(test_img)
+for i in range(0,6):
+    plt.imshow(face4[i].image)
+    plt.show()
 # ## 3. Loading Pretrained Face Detection Network
 
 # In[6]:
@@ -75,9 +81,9 @@ pnet, rnet, onet = df.create_mtcnn(sess, det_path)
 
 
 # Not sure how to set these parameters
-threshold = [0.01, 0.01, 0.01]
-factor = 0.9
-minsize = 200
+threshold = [0.5, 0.5, 0.3]
+factor = 0.79
+minsize = 10
 boxes, points = df.detect_face(test_img, minsize, pnet, rnet, onet, threshold, factor)
 
 
@@ -91,11 +97,11 @@ print(points)
 # In[17]:
 
 
-pnet_output = pnet(np.transpose(np.expand_dims(test_img, 0), (0,2,1,3)))
+#pnet_output = pnet(np.transpose(np.expand_dims(test_img, 0), (0,2,1,3)))
 
 
 # In[19]:
 
 
-plt.imshow(pnet_output)
+#plt.imshow(pnet_output)
 
