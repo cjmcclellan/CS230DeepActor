@@ -40,7 +40,7 @@ test_path = '../test_data/FaceDetect/WiderDataset'
 test_img_orig = imageio.imread(test_path + '/4.jpg')
 plt.imshow(test_img_orig)
 plt.show()
-test_img = test_img_orig/255.
+test_img = test_img_orig
 print(test_img.shape)
 
 
