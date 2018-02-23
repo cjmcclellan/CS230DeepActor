@@ -38,11 +38,11 @@ import tensorflow as tf
 from scipy import misc
 
 import facenet.src.align.detect_face as df
-import facenet
+import facenet.src.facenet as facenet
 
 
 gpu_memory_fraction = 0.3
-facenet_model_checkpoint = os.path.dirname(__file__) + "/../model_checkpoints/20170512-110547"
+facenet_model_checkpoint = os.path.dirname(__file__) + "/../../models/pretrained_facenet/20170512-110547"
 classifier_model = os.path.dirname(__file__) + "/../model_checkpoints/my_classifier_1.pkl"
 debug = False
 

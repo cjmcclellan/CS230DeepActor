@@ -14,11 +14,11 @@ import tensorflow as tf
 import imageio
 from matplotlib import pyplot as plt
 
-img_path = '../train_data/FaceID/Parks_Rec/nick_offerman_raw/nick_offerman'
-output_path = '../train_data/FaceID/Parks_Rec/nick_offerman_face/nick_offerman_face'
+img_path = '../train_data/FaceID/Parks_Rec/retta_raw/retta'
+output_path = '../train_data/FaceID/Parks_Rec/face/retta_face/retta_face'
 test_img_vec = list()
-for i in range(15):  # number of images in nick_offerman_raw
-    test_img_vec.append(imageio.imread(img_path + '{}.JPG'.format(i+1)))
+for i in range(10):  # number of images in retta_raw
+    test_img_vec.append(imageio.imread(img_path + '{}.jpg'.format(i+1)))
     # Create face detector
     detector = face.Detection()
     detector.minsize = 10
