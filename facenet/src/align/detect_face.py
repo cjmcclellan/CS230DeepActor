@@ -340,7 +340,6 @@ def detect_face(img, minsize, pnet, rnet, onet, threshold, factor):
 
     numbox = total_boxes.shape[0]
     if numbox>0:
-        print("I made it to numbox")
         pick = nms(total_boxes.copy(), 0.7, 'Union')
         total_boxes = total_boxes[pick,:]
         regw = total_boxes[:,2]-total_boxes[:,0]
