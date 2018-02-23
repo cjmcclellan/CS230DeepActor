@@ -25,6 +25,7 @@ faces = detector.find_faces(test_img)
 
 fig, ax = plt.subplots(1)
 ax.imshow(test_img)
+plt.suptitle('Example Image with Bounding Boxes and Points')
 for i,f in enumerate(faces):
     bb = f.bounding_box
     xybb = (bb[0], bb[1])
@@ -36,4 +37,5 @@ for i,f in enumerate(faces):
         circ = patches.Circle((f.points[0][j], f.points[1][j]), radius=2, facecolor='lime')
         ax.add_patch(circ)
 
+plt.savefig('example_output.png')
 plt.show()
