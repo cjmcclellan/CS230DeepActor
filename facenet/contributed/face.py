@@ -37,7 +37,7 @@ import numpy as np
 import tensorflow as tf
 from scipy import misc
 
-import facenet.src.align.detect_face
+import facenet.src.align.detect_face as df
 import facenet
 
 
@@ -130,12 +130,12 @@ class Detection:
             gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=gpu_memory_fraction)
             sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options, log_device_placement=False))
             with sess.as_default():
-                return align.detect_face.create_mtcnn(sess, None)
+                return df.create_mtcnn(sess, None)
 
     def find_faces(self, image):
         faces = []
 
-        bounding_boxes, _ = align.detect_face.detect_face(image, self.minsize,
+        bounding_boxes, _ = df.detect_face(image, self.minsize,
                                                           self.pnet, self.rnet, self.onet,
                                                           self.threshold, self.factor)
         for bb in bounding_boxes:
