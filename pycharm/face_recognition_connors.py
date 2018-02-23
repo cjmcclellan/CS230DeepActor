@@ -48,8 +48,8 @@ onet_path = det_path + 'det3.npy'
 
 # In[4]:
 
-test_path = '../test_data/FaceDetect/WiderDataset'
-test_img_orig = imageio.imread(test_path + '/4.jpg')
+test_path = '../test_data/FaceDetect/Parks&Rec'
+test_img_orig = imageio.imread(test_path + '/Parks&Rec_Rea&Ron.JPG')
 #plt.imshow(test_img_orig)
 #plt.show()
 test_img = test_img_orig
@@ -59,8 +59,13 @@ print(test_img.shape)
 
 FaceDetector = face.Detection()
 face4 = FaceDetector.find_faces(test_img)
-for i in range(0,6):
-    plt.imshow(face4[i].image)
+
+def AddBoundingBox(bounding_box, img):
+    bottomline = np.bounding_box[0]
+
+
+for faceimg in face4:
+    plt.imshow(faceimg.image)
     plt.show()
 # ## 3. Loading Pretrained Face Detection Network
 
