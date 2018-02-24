@@ -8,8 +8,8 @@ For the project Milestone, the running code is "multi_image_face_recognition_dem
 
 
 # Required for Running Code
-To run the above code, a trained model is needed.  However, the model was too large to place on github.  Please downlaod the model from the google drive folder "20170512-110547" in this link https://drive.google.com/drive/folders/1znBZRKEqYspPqAngyOwOgKLBLENI7uAk?usp=sharing
+To run the above code, a trained model is needed.  However, the model was too large to place on github.  Please downlaod the model from the google drive folder "pretrained_facenet" in this link https://drive.google.com/drive/folders/1znBZRKEqYspPqAngyOwOgKLBLENI7uAk?usp=sharing
 
-Place the folder "20170512-110547" (containing 4 files) to the path "CS230DeepActor/models/pretrained_facenet/".  This shold place the model in as such "CS230DeepActor/models/pretrained_facenet/20170512-110547" with 4 files in the "20170512-110547" folder.
+Place the folder "pretrained_facenet" (the folder "20170512-110547" which contains 4 files) to the path "CS230DeepActor/models/pretrained_facenet/".  This shold place the model in as such "CS230DeepActor/models/pretrained_facenet/20170512-110547" with 4 files in the "20170512-110547" folder.
 
 The libraries listed in the requirements.txt file are also needed
