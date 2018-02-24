@@ -15,6 +15,7 @@ from matplotlib import pyplot as plt
 im_id_path = '../test_data/FaceDetect/Parks_Rec/Parks_Rec_Rea_Ron.JPG'
 image = imageio.imread(im_id_path)
 
+#  Import and display the test image
 fig_input = plt.figure()
 plt.imshow(image)
 plt.tight_layout()
@@ -22,15 +23,17 @@ plt.suptitle('Ritta and Nick')
 plt.subplots_adjust(top=0.90)
 plt.show()
 
+# This recognizer has been trained to recognize Nick Offerman and Rhetta
 recognizer = face.Recognition()
 
-# Get Faces
+# Get Faces from the test image
 detector = face.Detection()
 detector.minsize = 10
 detector.face_crop_margin = 16
 faces = detector.find_faces(image)
 print(len(faces))
 
+# Show that there is no ID for the faces
 fig_input = plt.figure()
 plt.suptitle('Face ID Input')
 fig_input.add_subplot(1,2,1)
@@ -41,6 +44,7 @@ plt.imshow(faces[1].image)
 plt.title('Saved Name For Retta: ' + str(faces[1].name))
 plt.tight_layout()
 
+#
 plt.subplots_adjust(top=0.90)
 plt.savefig('face_id_input.png')
 plt.show()
