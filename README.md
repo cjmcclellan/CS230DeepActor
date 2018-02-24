@@ -9,3 +9,5 @@ For the project Milestone, the running code is "blah.py" and "blah2.py".  Blah.p
 
 # Required for Running Code
 To run the above code, a trained model is needed.  However, the model was too large to place on github.  Please downlaod the model from the google drive folder "asdfsd" and add to the path "CS230DeepActor/models/" 
+
+The libraries listed in the requirements.txt file are also needed
