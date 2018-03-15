@@ -1,0 +1,9 @@
+../../../train_data/FaceID/Star_Wars:_The_Last_Jedi_2017_movie/flattened/Luke_Skywalker--Mark_Hamill/Luke_Skywalker8.png 0 0 160 160
+../../../train_data/FaceID/Star_Wars:_The_Last_Jedi_2017_movie/flattened/Luke_Skywalker--Mark_Hamill/Luke_Skywalker1.png 0 0 160 160
+../../../train_data/FaceID/Star_Wars:_The_Last_Jedi_2017_movie/flattened/Luke_Skywalker--Mark_Hamill/Luke_Skywalker9.png 0 0 160 160
+../../../train_data/FaceID/Star_Wars:_The_Last_Jedi_2017_movie/flattened/Luke_Skywalker--Mark_Hamill/Luke_Skywalker6.png 0 0 160 160
+../../../train_data/FaceID/Star_Wars:_The_Last_Jedi_2017_movie/flattened/Luke_Skywalker--Mark_Hamill/Luke_Skywalker5.png 0 0 160 160
+../../../train_data/FaceID/Star_Wars:_The_Last_Jedi_2017_movie/flattened/Luke_Skywalker--Mark_Hamill/Luke_Skywalker7.png 2 0 160 160
+../../../train_data/FaceID/Star_Wars:_The_Last_Jedi_2017_movie/flattened/Luke_Skywalker--Mark_Hamill/Luke_Skywalker10.png 0 0 160 160
+../../../train_data/FaceID/Star_Wars:_The_Last_Jedi_2017_movie/flattened/Luke_Skywalker--Mark_Hamill/Luke_Skywalker2.png 0 0 160 160
+../../../train_data/FaceID/Star_Wars:_The_Last_Jedi_2017_movie/flattened/Luke_Skywalker--Mark_Hamill/Luke_Skywalker4.png 0 0 160 160

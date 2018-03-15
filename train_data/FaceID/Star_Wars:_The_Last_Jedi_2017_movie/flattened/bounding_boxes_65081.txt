@@ -1,0 +1,8 @@
+../../../train_data/FaceID/Star_Wars:_The_Last_Jedi_2017_movie/flattened/Kylo_Ren--Adam_Driver/Kylo_Ren8.png 0 0 160 160
+../../../train_data/FaceID/Star_Wars:_The_Last_Jedi_2017_movie/flattened/Kylo_Ren--Adam_Driver/Kylo_Ren3.png 0 0 160 160
+../../../train_data/FaceID/Star_Wars:_The_Last_Jedi_2017_movie/flattened/Kylo_Ren--Adam_Driver/Kylo_Ren1.png 0 0 160 160
+../../../train_data/FaceID/Star_Wars:_The_Last_Jedi_2017_movie/flattened/Kylo_Ren--Adam_Driver/Kylo_Ren2.png 0 0 160 160
+../../../train_data/FaceID/Star_Wars:_The_Last_Jedi_2017_movie/flattened/Kylo_Ren--Adam_Driver/Kylo_Ren4.png 0 0 160 160
+../../../train_data/FaceID/Star_Wars:_The_Last_Jedi_2017_movie/flattened/Kylo_Ren--Adam_Driver/Kylo_Ren10.png 0 0 160 160
+../../../train_data/FaceID/Star_Wars:_The_Last_Jedi_2017_movie/flattened/Kylo_Ren--Adam_Driver/Kylo_Ren6.png 24 0 160 160
+../../../train_data/FaceID/Star_Wars:_The_Last_Jedi_2017_movie/flattened/Kylo_Ren--Adam_Driver/Kylo_Ren7.png 3 0 160 160
