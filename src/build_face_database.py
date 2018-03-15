@@ -1,6 +1,11 @@
 # Script to help build a database of images for characters. Asks the user how they want it to be built.
 # Required to run from this folder
 
+# Needs code from:
+# https://github.com/hardikvasa/google-images-download
+# https://github.com/alberanid/imdbpy
+
+
 import warnings
 
 with warnings.catch_warnings():
