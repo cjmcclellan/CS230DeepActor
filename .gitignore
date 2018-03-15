@@ -8,6 +8,8 @@ venv/
 refs/remotes/origin/master
 models/pretrained_facenet/
 
+# training data
+train_data/FaceID/
 
 # Jupyter files
 .ipynb_checkpoints
