@@ -418,16 +418,16 @@ def parse_arguments(argv):
     parser = argparse.ArgumentParser()
     
     parser.add_argument('--logs_base_dir', type=str, 
-        help='Directory where to write event logs.', default='~/logs/facenet')
+        help='Directory where to write event logs.', default='/home/connor/Documents/CS230/CS230DeepActor/models/triplet_loss/logs')
     parser.add_argument('--models_base_dir', type=str,
-        help='Directory where to write trained models and checkpoints.', default='~/models/facenet')
+        help='Directory where to write trained models and checkpoints.', default='/home/connor/Documents/CS230/CS230DeepActor/models/triplet_loss')
     parser.add_argument('--gpu_memory_fraction', type=float,
         help='Upper bound on the amount of GPU memory that will be used by the process.', default=1.0)
     parser.add_argument('--pretrained_model', type=str,
         help='Load a pretrained model before training starts.')
     parser.add_argument('--data_dir', type=str,
         help='Path to the data directory containing aligned face patches.',
-        default='~/datasets/casia/casia_maxpy_mtcnnalign_182_160')
+        default='/home/connor/Documents/CS230/CS230DeepActor/train_data/Triplet_Loss/Movie_Triplets/Baseline')
     parser.add_argument('--model_def', type=str,
         help='Model definition. Points to a module containing the definition of the inference graph.', default='models.inception_resnet_v1')
     parser.add_argument('--max_nrof_epochs', type=int,
@@ -437,9 +437,9 @@ def parse_arguments(argv):
     parser.add_argument('--image_size', type=int,
         help='Image size (height, width) in pixels.', default=160)
     parser.add_argument('--people_per_batch', type=int,
-        help='Number of people per batch.', default=45)
+        help='Number of people per batch.', default=6)
     parser.add_argument('--images_per_person', type=int,
-        help='Number of images per person.', default=40)
+        help='Number of images per person.', default=2)
     parser.add_argument('--epoch_size', type=int,
         help='Number of batches per epoch.', default=1000)
     parser.add_argument('--alpha', type=float,
