@@ -7,8 +7,11 @@ venv/
 # Models
 refs/remotes/origin/master
 models/pretrained_facenet/
+models/triplet_loss/
 
 # training data
+src/train_data/FaceID/
+train_data/Triplet_Loss/
 train_data/FaceID/
 
 # Jupyter files

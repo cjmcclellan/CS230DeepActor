@@ -2,7 +2,7 @@
 # actor triplet loss.  Training examples will be generated using
 # actors the same Movie/TV Show
 
-#import src.build_face_database as bfd
+import src.build_face_database_main as bfd
 import os
 import random
 import shutil
@@ -23,10 +23,15 @@ with open(movie_list_path) as movie_list_file:
     del movie_list_str
 
 # Now run through each movie and collect faces
+
+# Some "hyperparameters"
+movie_selection = 1 # always choose the first choice
+num_actors = 4  #
+num_images = 9 #
+
 for movie in movie_list:
     # Run the build face database
-    os.system('../build_face_database.py')
-    print(movie)
+    bfd.main(movie, movie_selection, num_actors, num_images)
 
 # Now that the faces have been collected, sort them into triplets
 faceID_path = '/home/connor/Documents/CS230/CS230DeepActor/train_data/FaceID/'
