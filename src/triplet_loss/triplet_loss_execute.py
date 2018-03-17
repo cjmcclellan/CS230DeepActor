@@ -114,13 +114,22 @@ for rootdirectory, actors, files_blank in os.walk(actors_path):
                     for character in characters:
                         if first_round:  # compute the embeddings if the first round
                             for face_root, _, faces in os.walk(rootdir + '/' + character):
-                                new_character_image = imageio.imread(face_root + '/' + faces[0])
+                                new_character_image = imageio.imread(face_root + '/' + returnFace_num(faces, '0'))
                                 new_character_embeddings = tripletModel.gen_embedding(new_character_image)
-                                saved_embeddings[character] = new_character_embeddings
-                                actor_results.append([character, L2_Loss(actor_embeddings, new_character_embeddings)])
+                                if new_character_embeddings[0] == None: # check if the character has embeddings that work
+                                    print(character + ' did not have any faces')
+                                    actor_results.append(['None', 100])
+                                    saved_embeddings[character] = new_character_embeddings
+                                else:
+                                    saved_embeddings[character] = new_character_embeddings
+                                    actor_results.append([character, L2_Loss(actor_embeddings, new_character_embeddings)])
                         else: # use the computed embeddings if not the first round
-                            actor_results.append([character, L2_Loss(actor_embeddings, saved_embeddings[character])])
-                    first_round = False
+                            # check that the character has a face
+                            if saved_embeddings[character][0] == None:
+                                actor_results.append(['None', 100])
+                            else:
+                                actor_results.append([character, L2_Loss(actor_embeddings, saved_embeddings[character])])
+                first_round = False
             # else:
             #     actor_results.append(['None', 100]) # if the comparrison didn't work, add a large loss
             #     print(actor + ' does not have 4 face images')
@@ -129,7 +138,7 @@ for rootdirectory, actors, files_blank in os.walk(actors_path):
 
         # check if the prediction was right
         if final_results[i_actor][0][0] == actor:
-            correct_actor.append(actor)
+            correct_actor.append((actor, final_results[i_actor][0][1]))
             prediction_results.append(1)
         elif final_results[i_actor][0][0] == 'None':
             a = 'Done Nothing'

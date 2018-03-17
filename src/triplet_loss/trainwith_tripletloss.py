@@ -12,6 +12,9 @@ import tensorflow as tf
 import facenet.src.facenet as facenet
 import facenet.contributed.face as face
 import imageio
+import pickle as pkl
+import os
+import numpy as np
 
 
 class Encoding_Model:
@@ -27,6 +30,28 @@ class Encoding_Model:
             image = imageio.imread(imagepath)
         return self.detect.find_faces(image)
 
+    # This function will generate all the embeddings from the images in the path and return a dictionary with the
+    # image names as the keys
+    # The file structure should be path -> folders/flattened_faces.jpg
+    def generate_all_embeddings(self, path):
+        all_embeddings = {}
+        # step through all the actors
+        for root, actors, _ in os.walk(path):
+            for actor in actors:
+                # step through all the faces
+                for root2, _, faces in os.walk(root + actor):
+                    for face in faces:
+                        all_embeddings[face] = self.generate_embedding(self.imagetoface(root2 + face)) # get the embeddings
+        # now return the embeddings
+        return all_embeddings
+
+    # This function will save the embeddings as a pickle
+    def saveEmbeddings(self, pathtosave, embeddings, filename):
+        pkl.dump(embeddings, open(pathtosave + filename, 'wb'))
+
+    # This function will load the embeddings from the path
+    def loadEmbeddings(self, pathtoload):
+        return pkl.load(open(pathtoload, 'rb'))
 
     # input a face object and get the embeddings out
     def generate_embedding(self, face):
@@ -44,3 +69,10 @@ class Encoding_Model:
 # This class will be an NN to map the encodings to face comparrison
 class Triplet_NN:
     def __init__(self):
+        self.sess = tf.Session()
+
+
+    def triplet_loss(self, anchor, positive, negative, alpha):
+        anpos_sum = np.sum(np.square(np.subtract(vec1, vec2)))
+
+    def choose_triplets(self, ):

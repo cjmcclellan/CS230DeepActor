@@ -29,12 +29,12 @@ movie_selection = 1 # always choose the first choice
 num_actors = 5  #
 num_images = 9 #
 #print(os.path.exists('/home/connor/Documents/CS230/CS230DeepActor/train_data/FaceID/The_Dark_Knight_2008_movie/downloaded/Bruce Wayne The Dark Knight Christian Bale 2008'))
-for movie in movie_list:
-    # Run the build face database
-    try:
-        bfd.main(movie, movie_selection, num_actors, num_images)
-    except:
-        a = 10
+# for movie in movie_list:
+#     # Run the build face database
+#     try:
+#         bfd.main(movie, movie_selection, num_actors, num_images)
+#     except:
+#         a = 10
 
 # Now that the faces have been collected, sort them into triplets
 faceID_path = '/home/connor/Documents/CS230/CS230DeepActor/train_data/FaceID/'
