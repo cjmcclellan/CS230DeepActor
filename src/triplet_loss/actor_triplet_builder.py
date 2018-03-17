@@ -26,15 +26,15 @@ with open(movie_list_path) as movie_list_file:
 
 # Some "hyperparameters"
 movie_selection = 1 # always choose the first choice
-num_actors = 4  #
+num_actors = 5  #
 num_images = 9 #
 #print(os.path.exists('/home/connor/Documents/CS230/CS230DeepActor/train_data/FaceID/The_Dark_Knight_2008_movie/downloaded/Bruce Wayne The Dark Knight Christian Bale 2008'))
 for movie in movie_list:
     # Run the build face database
-    #try:
-    bfd.main(movie, movie_selection, num_actors, num_images)
-    #except:
-     #   a = 10
+    try:
+        bfd.main(movie, movie_selection, num_actors, num_images)
+    except:
+        a = 10
 
 # Now that the faces have been collected, sort them into triplets
 faceID_path = '/home/connor/Documents/CS230/CS230DeepActor/train_data/FaceID/'
@@ -52,7 +52,7 @@ for root, movies, files_blank in os.walk(faceID_path):
                 for i_char, character in enumerate(characters):
                     triplet_example_path = triplet_examples + character + '/'
                     for root3, dir_none, images in os.walk(root2 + character + '/'):
-                        if len(images) > 1:  # make sure there are at least two faces
+                        if len(images) > 2:  # make sure there are at least three faces
 
                             if not os.path.exists(triplet_example_path):
                                 os.makedirs(triplet_example_path)

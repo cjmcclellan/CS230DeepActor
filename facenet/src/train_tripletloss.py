@@ -172,7 +172,14 @@ def main(args):
 
             if args.pretrained_model:
                 print('Restoring pretrained model: %s' % args.pretrained_model)
-                saver.restore(sess, os.path.expanduser(args.pretrained_model))
+                model_exp = os.path.expanduser(args.pretrained_model)
+                print('Model directory: %s' % args.pretrained_model)
+                meta_file, ckpt_file = facenet.get_model_filenames(args.pretrained_model)
+                print('Metagraph file: %s' % meta_file)
+                print('Checkpoint file: %s' % ckpt_file)
+                #saver = tf.train.import_meta_graph(os.path.join(model_exp, meta_file))
+                saver.restore(tf.get_default_session(), os.path.join(model_exp, ckpt_file))
+                #saver.restore(sess, os.path.expanduser(args.pretrained_model))
 
             # Training and validation loop
             epoch = 0
@@ -424,7 +431,8 @@ def parse_arguments(argv):
     parser.add_argument('--gpu_memory_fraction', type=float,
         help='Upper bound on the amount of GPU memory that will be used by the process.', default=1.0)
     parser.add_argument('--pretrained_model', type=str,
-        help='Load a pretrained model before training starts.')
+        help='Load a pretrained model before training starts.',
+        default='/home/connor/Documents/CS230/CS230DeepActor/models/pretrained_facenet/20170512-110547')
     parser.add_argument('--data_dir', type=str,
         help='Path to the data directory containing aligned face patches.',
         default='/home/connor/Documents/CS230/CS230DeepActor/train_data/Triplet_Loss/Movie_Triplets/Baseline')
@@ -437,11 +445,11 @@ def parse_arguments(argv):
     parser.add_argument('--image_size', type=int,
         help='Image size (height, width) in pixels.', default=160)
     parser.add_argument('--people_per_batch', type=int,
-        help='Number of people per batch.', default=6)
+        help='Number of people per batch.', default=20)
     parser.add_argument('--images_per_person', type=int,
-        help='Number of images per person.', default=2)
+        help='Number of images per person.', default=3)
     parser.add_argument('--epoch_size', type=int,
-        help='Number of batches per epoch.', default=1000)
+        help='Number of batches per epoch.', default=100)
     parser.add_argument('--alpha', type=float,
         help='Positive to negative triplet distance margin.', default=0.2)
     parser.add_argument('--embedding_size', type=int,
@@ -456,7 +464,7 @@ def parse_arguments(argv):
     parser.add_argument('--weight_decay', type=float,
         help='L2 weight regularization.', default=0.0)
     parser.add_argument('--optimizer', type=str, choices=['ADAGRAD', 'ADADELTA', 'ADAM', 'RMSPROP', 'MOM'],
-        help='The optimization algorithm to use', default='ADAGRAD')
+        help='The optimization algorithm to use', default='ADAM')
     parser.add_argument('--learning_rate', type=float,
         help='Initial learning rate. If set to a negative value a learning rate ' +
         'schedule can be specified in the file "learning_rate_schedule.txt"', default=0.1)

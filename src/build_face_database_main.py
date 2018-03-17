@@ -158,10 +158,11 @@ def main(movie_name, val, num_actors, num_images):
 
         # Get a list of the pics for the current actor
         noQuote_query_dir = downloads_dir + query
-        pics = [f for f in listdir(noQuote_query_dir) if isfile(join(noQuote_query_dir, f))]  # THere was an issue with using " " for the file
-
+        if not os.path.exists(query_dir):
+            query_dir = noQuote_query_dir  # check if the directory has quotes or not
+        pics = [f for f in listdir(query_dir) if isfile(join(query_dir, f))]  # THere was an issue with using " " for the file
         for j, pic in enumerate(pics):
-            file = noQuote_query_dir + '/' + pic  # Changed to noQuote query dir
+            file = query_dir + '/' + pic  # Changed to noQuote query dir
             try:
                 curr_img = imread(file)
             except:
@@ -187,10 +188,10 @@ def main(movie_name, val, num_actors, num_images):
             print('Flattening faces')
             # Flatten faces
             pwd = os.getcwd()
-            align_path = '../facenet/src/align/'
+            align_path = '/home/connor/Documents/CS230/CS230DeepActor/facenet/src/align/'
             try:
                 os.chdir(align_path)
-                subprocess.check_output(['python', 'align_dataset_mtcnn.py', '../../' + face_dir, '../../' + flat_dir])
+                subprocess.check_output(['python', 'align_dataset_mtcnn.py', face_dir, flat_dir])
                 os.chdir(pwd)
             except:
                 os.chdir(pwd)
