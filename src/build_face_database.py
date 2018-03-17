@@ -94,7 +94,7 @@ num_actors = input('\nHow many characters do you want to include? (Taken from to
 
 try:
     num_actors = int(num_actors)
-    if num_actors not in range(1, min(len(movie['cast']), 30)):
+    if num_actors not in range(1, min(len(movie['cast'])+1, 30)):
         print('Please enter a value between 1 and {}'.format(min(movie['cast'], 30)))
         raise Exception
 
@@ -106,7 +106,7 @@ num_images = input('\nHow many images per actors? (1-100): ')
 
 try:
     num_images = int(num_images)
-    if num_images not in range(1, 100):
+    if num_images not in range(1, 101):
         print('Please enter a value between 1 and 100')
         raise Exception
 
@@ -144,17 +144,26 @@ for i in range(num_actors):
         os.makedirs(downloads_dir)
 
     query = ' '.join([character, movie['title'], movie['cast'][i]['name'], str(movie['year'])])
-    query_dir = downloads_dir + '\"{}\"'.format(query)
+    query = ''.join(query.split(','))
+    query_dir = downloads_dir + query
 
     print('\nDownloading {} images for {}'.format(str(num_images), movie['cast'][i]['name']))
+    # subprocess.check_output(
+    #     ['googleimagesdownload', '-k', '{}'.format(query), '-l', str(num_images), '-o', downloads_dir, '-f',
+    #      'jpg', '-s', 'medium'])
     subprocess.check_output(
-        ['googleimagesdownload', '-k', '\"{}\"'.format(query), '-l', str(num_images), '-o', downloads_dir, '-f',
-         'jpg', '-s','medium'])
+        ['googleimagesdownload', '-k', '{}'.format(query), '-l', str(num_images), '-o', downloads_dir, '-f', 'jpg'])
     print('Downloads finished')
     print('Processing images and finding faces')
 
     # Get a list of the pics for the current actor
-    pics = [f for f in listdir(query_dir) if isfile(join(query_dir, f))]
+    qlist = list()
+    try:
+        qlist = listdir(query_dir)
+    except:
+        query_dir = '\"' + query_dir + '\"'
+        qlist = listdir(query_dir)
+    pics = [f for f in qlist if isfile(join(query_dir, f))]
 
     for j, pic in enumerate(pics):
         file = query_dir + '/' + pic
@@ -165,10 +174,16 @@ for i in range(num_actors):
             # sometimes this happens because the correct file type is not returned
             print('Image Read Failed.')
             continue
+
         detector = face.Detection()
         detector.minsize = 10
         detector.face_crop_margin = 16
-        faces = detector.find_faces(curr_img)
+        try:
+            faces = detector.find_faces(curr_img)
+        except:
+            # Something in detector failed. Move on to next image
+            print('Skipped', pic, ' - Something went wrong finding faces')
+
         if len(faces) > 1:
             print('Skipped', pic, ' - More than one face')
         elif len(faces) == 0:
@@ -178,17 +193,21 @@ for i in range(num_actors):
             imwrite(face_dir + char_actor + '_'.join(character.split()) +
                     '{}.jpg'.format(j+1), faces[0].image, format='jpg')
 
-    with warnings.catch_warnings():
-        warnings.filterwarnings("ignore", category=FutureWarning)
-        print('Flattening faces')
-        # Flatten faces
-        pwd = os.getcwd()
-        align_path = '../facenet/src/align/'
-        try:
-            os.chdir(align_path)
-            subprocess.check_output(['python', 'align_dataset_mtcnn.py', '../../' + face_dir, '../../' + flat_dir])
-            os.chdir(pwd)
-        except:
-            os.chdir(pwd)
+
+    print('Flattening faces')
+    # Flatten faces
+    pwd = os.getcwd()
+    align_path = '../facenet/src/align/'
+    try:
+        os.chdir(align_path)
+        subprocess.check_output(
+            ['python', '-W', 'ignore', 'align_dataset_mtcnn.py', '../../' + face_dir, '../../' + flat_dir])
+        os.chdir(pwd)
+    except:
+        os.chdir(pwd)
+
+
+
+
 
 print('Database creation complete!')

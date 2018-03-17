@@ -19,3 +19,6 @@ train_data/FaceID/
 
 # PyCharm
 .idea/
+
+# Logs
+logs/

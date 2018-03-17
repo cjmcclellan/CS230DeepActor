@@ -35,8 +35,9 @@ import tensorflow as tf
 import numpy as np
 import importlib
 import argparse
-import facenet
-import lfw
+sys.path.append('../')
+import facenet.src.facenet as facenet
+#import lfw
 import h5py
 import tensorflow.contrib.slim as slim
 from tensorflow.python.ops import data_flow_ops
@@ -76,13 +77,14 @@ def main(args):
     if args.pretrained_model:
         pretrained_model = os.path.expanduser(args.pretrained_model)
         print('Pre-trained model: %s' % pretrained_model)
-    
-    if args.lfw_dir:
-        print('LFW directory: %s' % args.lfw_dir)
-        # Read the file containing the pairs used for testing
-        pairs = lfw.read_pairs(os.path.expanduser(args.lfw_pairs))
-        # Get the paths for the corresponding images
-        lfw_paths, actual_issame = lfw.get_paths(os.path.expanduser(args.lfw_dir), pairs, args.lfw_file_ext)
+
+    # Removed lfw dir. Using custom dataset
+    # if args.lfw_dir:
+    #     print('LFW directory: %s' % args.lfw_dir)
+    #     # Read the file containing the pairs used for testing
+    #     pairs = lfw.read_pairs(os.path.expanduser(args.lfw_pairs))
+    #     # Get the paths for the corresponding images
+    #     lfw_paths, actual_issame = lfw.get_paths(os.path.expanduser(args.lfw_dir), pairs, args.lfw_file_ext)
     
     with tf.Graph().as_default():
         tf.set_random_seed(args.seed)
@@ -205,7 +207,8 @@ def main(args):
 
             if pretrained_model:
                 print('Restoring pretrained model: %s' % pretrained_model)
-                saver.restore(sess, pretrained_model)
+                # saver.restore(sess, pretrained_model)
+                facenet.load_model(pretrained_model)
 
             # Training and validation loop
             print('Running training')
@@ -221,10 +224,10 @@ def main(args):
                 # Save variables and the metagraph if it doesn't exist already
                 save_variables_and_metagraph(sess, saver, summary_writer, model_dir, subdir, step)
 
-                # Evaluate on LFW
-                if args.lfw_dir:
-                    evaluate(sess, enqueue_op, image_paths_placeholder, labels_placeholder, phase_train_placeholder, batch_size_placeholder, 
-                        embeddings, label_batch, lfw_paths, actual_issame, args.lfw_batch_size, args.lfw_nrof_folds, log_dir, step, summary_writer)
+                # # Evaluate on LFW
+                # if args.lfw_dir:
+                #     evaluate(sess, enqueue_op, image_paths_placeholder, labels_placeholder, phase_train_placeholder, batch_size_placeholder,
+                #         embeddings, label_batch, lfw_paths, actual_issame, args.lfw_batch_size, args.lfw_nrof_folds, log_dir, step, summary_writer)
     return model_dir
   
 def find_threshold(var, percentile):
