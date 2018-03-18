@@ -1,8 +1,0 @@
-../../../train_data/FaceID/Star_Wars:_The_Last_Jedi_2017_movie/flattened/Leia_Organa--Carrie_Fisher/Leia_Organa4.png 1 0 160 160
-../../../train_data/FaceID/Star_Wars:_The_Last_Jedi_2017_movie/flattened/Leia_Organa--Carrie_Fisher/Leia_Organa8.png 0 0 160 160
-../../../train_data/FaceID/Star_Wars:_The_Last_Jedi_2017_movie/flattened/Leia_Organa--Carrie_Fisher/Leia_Organa1.png 0 0 156 160
-../../../train_data/FaceID/Star_Wars:_The_Last_Jedi_2017_movie/flattened/Leia_Organa--Carrie_Fisher/Leia_Organa6.png 0 0 160 160
-../../../train_data/FaceID/Star_Wars:_The_Last_Jedi_2017_movie/flattened/Leia_Organa--Carrie_Fisher/Leia_Organa9.png 1 0 160 160
-../../../train_data/FaceID/Star_Wars:_The_Last_Jedi_2017_movie/flattened/Leia_Organa--Carrie_Fisher/Leia_Organa10.png 0 0 160 160
-../../../train_data/FaceID/Star_Wars:_The_Last_Jedi_2017_movie/flattened/Leia_Organa--Carrie_Fisher/Leia_Organa7.png 0 0 160 160
-../../../train_data/FaceID/Star_Wars:_The_Last_Jedi_2017_movie/flattened/Leia_Organa--Carrie_Fisher/Leia_Organa3.png 0 0 160 160

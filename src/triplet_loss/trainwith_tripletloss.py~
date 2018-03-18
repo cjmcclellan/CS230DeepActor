@@ -68,22 +68,11 @@ class Encoding_Model:
 
 # This class will be an NN to map the encodings to face comparrison
 class Triplet_NN:
-    def __init__(self, input_shape):
+    def __init__(self):
         self.sess = tf.Session()
-        input_layer = tf.placeholder(input_shape=input_shape)
-        anchor = tf.placeholder(units=1028)
-        postive = 
-        dense1 = tf.layers.dense(inputs=input_layer, units=1028, activation=tf.nn.relu)
-        dense2 = tf.layers.dense(inputs=dense1, units=1028, activation=tf.nn.relu)
+
 
     def triplet_loss(self, anchor, positive, negative, alpha):
-        tf.
-
-    def train_one(self, anchor, positive, negative):
-        anchor_result = self.sess.run(anchor)
-        positive_result = self.sess.run(positive)
-        negative_result = self.sess.run(negative)
-        loss = triplet_loss(anchor_result, positive_result, negative_result)
-        
+        anpos_sum = np.sum(np.square(np.subtract(vec1, vec2)))
 
     def choose_triplets(self, ):
