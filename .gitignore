@@ -8,7 +8,8 @@ venv/
 refs/remotes/origin/master
 models/pretrained_facenet/
 models/triplet_loss/
-models/softmax/
+models/softmax/ridiculous6/
+
 
 # training data
 src/train_data/FaceID/
@@ -28,3 +29,6 @@ test_data/ridiculous6/raw/
 
 # Logs
 logs/
+
+# Weird copies
+*.csv\#
