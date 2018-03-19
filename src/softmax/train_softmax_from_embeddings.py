@@ -156,7 +156,7 @@ formatted_training_dict = dict()
 formatted_training_dict['X_train'] = X_train
 formatted_training_dict['Y_train'] = Y_train
 formatted_training_dict['X_val'] = X_val
-formatted_training_dict['X_val'] = X_val
+formatted_training_dict['Y_val'] = Y_val
 formatted_dataset_path = os.path.abspath(r6_path + 'r6_formatted_dataset.pkl')
 with open(formatted_dataset_path, 'wb') as f:
     pickle.dump(formatted_training_dict,f)

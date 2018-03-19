@@ -9,20 +9,12 @@ with warnings.catch_warnings():
     import pickle
     import os
     import numpy as np
-    from imageio import imread
-
-    import facenet.contributed.face as face
-
-    from sklearn.preprocessing import OneHotEncoder, LabelEncoder
 
     import torch.nn as nn
     import torch
-    import torch.optim as optim
     from torch.autograd import Variable
-    # from pylab import *
-    import matplotlib.pyplot as plt
-    import torch.optim.lr_scheduler as lr_scheduler
-    import json
+    import pandas as pd
+
 
 ########################
 # Load NN
@@ -70,7 +62,10 @@ Yhat = model(X_test)
 temp = Yhat.data.numpy()
 temp3 = torch.max(Yhat, 1)[1].data.numpy()
 temp2 = Y_test.data.numpy()
-num_correct = np.sum((torch.max(Yhat, 1)[1].data.numpy() == Y_test.data.numpy().reshape(len(examples))))
+comparison = (torch.max(Yhat, 1)[1].data.numpy() == Y_test.data.numpy().reshape(len(examples)))
+comp_series = pd.Series(comparison)
+comp_series.to_csv('test_comparison.csv')
+num_correct = np.sum(comparison)
 test_accuracy = num_correct/num_examples
 
 print('Test Results:')
