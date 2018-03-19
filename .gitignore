@@ -15,6 +15,11 @@ src/train_data/FaceID/
 train_data/Triplet_Loss/
 train_data/FaceID/
 
+# test data
+test_data/ridiculous6/screenshot/
+test_data/ridiculous6/face/
+test_data/ridiculous6/raw/
+
 # Jupyter files
 .ipynb_checkpoints
 
