@@ -8,6 +8,7 @@ venv/
 refs/remotes/origin/master
 models/pretrained_facenet/
 models/triplet_loss/
+models/softmax/
 
 # training data
 src/train_data/FaceID/

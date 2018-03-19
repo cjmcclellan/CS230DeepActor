@@ -71,9 +71,6 @@ train_perc = .8
 dev_perc = 1-train_perc
 
 examples = dataset_dict['examples']
-##########################################################
-np.random.seed(47)
-##########################################################
 
 np.random.shuffle(examples)
 training, validation = examples[:int(num_examples*train_perc)], examples[int(num_examples*train_perc):]
@@ -170,18 +167,20 @@ model = nn.Sequential(
 
 loss_func = nn.CrossEntropyLoss()
 
-epochs = 200
+epochs = 5000
 lr = 0.1e-3
 minibatch_size = 32
 num_minibatches = int(len(training)/minibatch_size)
 
-weight_decay = 0
+weight_decay = 0.0
 step_size = 10
 gamma = 0.99
 optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
 scheduler = lr_scheduler.StepLR(optimizer, step_size=step_size, gamma=gamma)
 loss_vec = list()
+accuracy_vec = list()
 vloss_vec = list()
+vaccuracy_vec = list()
 
 x = Variable(X_train)
 y = Variable(Y_train)
@@ -218,10 +217,14 @@ for epoch in range(epochs):
         optimizer.step()
 
     # Get loss for whole batch
-    loss = loss_func(model(x), torch.max(y, 1)[1])
+    yhat = model(x)
+    accuracy_vec.append(np.sum((torch.max(yhat, 1)[1] == torch.max(y, 1)[1]).data.numpy())/len(training))
+    loss = loss_func(yhat, torch.max(y, 1)[1])
     loss_vec.append(float(loss.data.numpy()))
     # track loss for validation set
-    vloss = loss_func(model(xv), torch.max(yv, 1)[1])
+    yvhat = model(xv)
+    vaccuracy_vec.append(np.sum((torch.max(yvhat, 1)[1] == torch.max(yv, 1)[1]).data.numpy())/len(validation))
+    vloss = loss_func(yvhat, torch.max(yv, 1)[1])
     vloss_vec.append(float(vloss.data.numpy()))
     # track learning rate
     lr_vec.append(optimizer.param_groups[0]['lr'])
@@ -241,6 +244,8 @@ with open(os.path.join(r6_model_path, '{}/model_description.txt'.format(model_nu
 perf_dict['train_loss'] = loss_vec
 perf_dict['validation_loss'] = vloss_vec
 perf_dict['learning_rate'] = lr_vec
+perf_dict['train_accuracy'] = accuracy_vec
+perf_dict['validatio_accuracy'] = vaccuracy_vec
 perf_dict['optimizer'] = optimizer
 with open(os.path.join(r6_model_path, '{}/model_performance.pkl'.format(model_num)), 'wb') as f:
     pickle.dump(perf_dict, f)
@@ -253,6 +258,11 @@ plt.semilogy(vloss_vec)
 plt.xlabel('Epochs')
 plt.ylabel('Loss')
 
+plt.figure()
+plt.semilogy(accuracy_vec)
+plt.semilogy(vaccuracy_vec)
+plt.xlabel('Epochs')
+plt.ylabel('Accuracy')
 
 plt.figure()
 plt.semilogy(lr_vec)
