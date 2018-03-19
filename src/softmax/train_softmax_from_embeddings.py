@@ -1,5 +1,5 @@
 # From the embeddings created in 'softmax_embedding_generation.py', we train a softmax layer with the output data from
-# that file. Borrowed structure from classifier.py
+# that file.
 
 import warnings
 
@@ -152,6 +152,14 @@ for i, elem in enumerate(validation):
     X_val[i, :] = elem[0]
 X_val = torch.Tensor(X_val)
 
+formatted_training_dict = dict()
+formatted_training_dict['X_train'] = X_train
+formatted_training_dict['Y_train'] = Y_train
+formatted_training_dict['X_val'] = X_val
+formatted_training_dict['X_val'] = X_val
+formatted_dataset_path = os.path.abspath(r6_path + 'r6_formatted_dataset.pkl')
+with open(formatted_dataset_path, 'wb') as f:
+    pickle.dump(formatted_training_dict,f)
 
 #######################
 # Building the model, encoding 128 vector
@@ -172,7 +180,7 @@ lr = 0.1e-3
 minibatch_size = 32
 num_minibatches = int(len(training)/minibatch_size)
 
-weight_decay = 0.0
+weight_decay = 0.1
 step_size = 10
 gamma = 0.99
 optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
@@ -251,7 +259,8 @@ with open(os.path.join(r6_model_path, '{}/model_performance.pkl'.format(model_nu
     pickle.dump(perf_dict, f)
 
 
-print('Start Loss:', loss_vec[0], 'End Loss:', loss_vec[-1])
+print('Training - Start Loss:', loss_vec[0], 'End Loss:', loss_vec[-1])
+print('Validation - Start Loss:', vloss_vec[0], 'End Loss:', vloss_vec[-1])
 plt.figure()
 plt.semilogy(loss_vec)
 plt.semilogy(vloss_vec)
