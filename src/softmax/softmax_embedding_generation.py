@@ -50,6 +50,7 @@ for label in char_actors:
     dataset_dict[label + '__num_examples'] = len(faces)
 
 dataset_dict['num_examples'] = len(examples)
+dataset_dict['examples'] = examples
 
 with open(r6_path + 'r6_dataset.pkl', 'wb') as f:
     pickle.dump(dataset_dict, f)
