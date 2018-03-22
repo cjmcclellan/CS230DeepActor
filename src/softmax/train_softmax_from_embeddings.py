@@ -46,120 +46,133 @@ def random_mini_batches(X, Y, minibatch_size):
 
 
 r6_path = '../../train_data/FaceID/The_Ridiculous_6_2015_movie/extra/'
+formatted_dataset_path = os.path.abspath(r6_path + 'r6_formatted_dataset.pkl')
 r6_model_path = os.path.abspath('../../models/softmax/ridiculous6/')
 dataset_path = os.path.abspath(r6_path + 'r6_dataset.pkl')
-with open(dataset_path, 'rb') as f:
-    dataset_dict = pickle.load(f)
+if not os.path.isfile(formatted_dataset_path):
+    with open(dataset_path, 'rb') as f:
+        dataset_dict = pickle.load(f)
 
 
-print('\nTotal number of examples: {}'.format(dataset_dict['num_examples']))
-num_examples = dataset_dict['num_examples']
+    print('\nTotal number of examples: {}'.format(dataset_dict['num_examples']))
+    num_examples = dataset_dict['num_examples']
 
-# List distribution of data
-print('Dataset distribution')
-# percentage of database a specific label
-dataset_perc = list()
-for label in dataset_dict['labels']:
-    dataset_perc.append(dataset_dict[label + '__num_examples'] / num_examples)
-    print(label, ':', dataset_perc[-1])
+    # List distribution of data
+    print('Dataset distribution')
+    # percentage of database a specific label
+    dataset_perc = list()
+    for label in dataset_dict['labels']:
+        dataset_perc.append(dataset_dict[label + '__num_examples'] / num_examples)
+        print(label, ':', dataset_perc[-1])
 
-print('\nMost represented example:', max(dataset_perc), 'with label', dataset_dict['labels'][np.argmax(dataset_perc)])
-print('Least represented example:', min(dataset_perc), 'with label', dataset_dict['labels'][np.argmin(dataset_perc)])
+    print('\nMost represented example:', max(dataset_perc), 'with label', dataset_dict['labels'][np.argmax(dataset_perc)])
+    print('Least represented example:', min(dataset_perc), 'with label', dataset_dict['labels'][np.argmin(dataset_perc)])
 
-# train, dev split
-train_perc = .8
-dev_perc = 1-train_perc
+    # train, dev split
+    train_perc = .8
+    dev_perc = 1-train_perc
 
-examples = dataset_dict['examples']
+    examples = dataset_dict['examples']
 
-np.random.shuffle(examples)
-training, validation = examples[:int(num_examples*train_perc)], examples[int(num_examples*train_perc):]
-print('\nTraining examples: {} (at {}%)'.format(len(training), train_perc*100))
-tdict = {}
-for ex in training:
-    if ex[1] in tdict.keys():
-        tdict[ex[1]] += 1
-    else:
-        tdict[ex[1]] = 1
+    np.random.shuffle(examples)
+    training, validation = examples[:int(num_examples*train_perc)], examples[int(num_examples*train_perc):]
+    print('\nTraining examples: {} (at {}%)'.format(len(training), train_perc*100))
+    tdict = {}
+    for ex in training:
+        if ex[1] in tdict.keys():
+            tdict[ex[1]] += 1
+        else:
+            tdict[ex[1]] = 1
 
-print('Training set distribution')
-train_set_perc = list()
-train_keys = list()
-for key, val in tdict.items():
-    train_set_perc.append(val/len(training))
-    train_keys.append(key)
-    print(key, ':', train_set_perc[-1])
+    print('Training set distribution')
+    train_set_perc = list()
+    train_keys = list()
+    for key, val in tdict.items():
+        train_set_perc.append(val/len(training))
+        train_keys.append(key)
+        print(key, ':', train_set_perc[-1])
 
-print('\nMost represented training example:', max(train_set_perc), 'with label', train_keys[np.argmax(train_set_perc)])
-print('Least represented training example:', min(train_set_perc), 'with label', train_keys[np.argmin(train_set_perc)])
+    print('\nMost represented training example:', max(train_set_perc), 'with label', train_keys[np.argmax(train_set_perc)])
+    print('Least represented training example:', min(train_set_perc), 'with label', train_keys[np.argmin(train_set_perc)])
 
-print('\nValidation examples: {} (at {}%)'.format(len(validation), dev_perc*100))
-vdict = {}
-for ex in validation:
-    if ex[1] in vdict.keys():
-        vdict[ex[1]] += 1
-    else:
-        vdict[ex[1]] = 1
+    print('\nValidation examples: {} (at {}%)'.format(len(validation), dev_perc*100))
+    vdict = {}
+    for ex in validation:
+        if ex[1] in vdict.keys():
+            vdict[ex[1]] += 1
+        else:
+            vdict[ex[1]] = 1
 
-print('Validation set distribution')
-val_set_perc = list()
-val_keys = list()
-for key, val in vdict.items():
-    val_set_perc.append(val/len(validation))
-    val_keys.append(key)
-    print(key, ':', val_set_perc[-1])
+    print('Validation set distribution')
+    val_set_perc = list()
+    val_keys = list()
+    for key, val in vdict.items():
+        val_set_perc.append(val/len(validation))
+        val_keys.append(key)
+        print(key, ':', val_set_perc[-1])
 
-print('\nMost represented validation example:', max(val_set_perc), 'with label', train_keys[np.argmax(val_set_perc)])
-print('Least represented validation example:', min(val_set_perc), 'with label', train_keys[np.argmin(val_set_perc)])
+    print('\nMost represented validation example:', max(val_set_perc), 'with label', train_keys[np.argmax(val_set_perc)])
+    print('Least represented validation example:', min(val_set_perc), 'with label', train_keys[np.argmin(val_set_perc)])
 
-###################
-# Build vectorized training dataset
-###################
-label_train_list = np.array([elem[1] for elem in training])
+    ###################
+    # Build vectorized training dataset
+    ###################
+    label_train_list = np.array([elem[1] for elem in training])
 
-# y outputs
-label_encoder = LabelEncoder()
-int_encoded = label_encoder.fit_transform(label_train_list)
+    # y outputs
+    label_encoder = LabelEncoder()
+    int_encoded = label_encoder.fit_transform(label_train_list)
 
-ohe = OneHotEncoder(sparse=False)
-# ohe.fit(range(dataset_dict['num_labels']))
-int_encoded = int_encoded.reshape(len(int_encoded), 1)
-Y_train = torch.LongTensor(ohe.fit_transform(int_encoded))
+    ohe = OneHotEncoder(sparse=False)
+    # ohe.fit(range(dataset_dict['num_labels']))
+    int_encoded = int_encoded.reshape(len(int_encoded), 1)
+    Y_train = torch.LongTensor(ohe.fit_transform(int_encoded))
 
-# X
-X_train = np.zeros((len(training), len(training[0][0])))
-for i, elem in enumerate(training):
-    X_train[i, :] = elem[0]
-X_train = torch.Tensor(X_train)
+    # X
+    X_train = np.zeros((len(training), len(training[0][0])))
+    for i, elem in enumerate(training):
+        X_train[i, :] = elem[0]
+    X_train = torch.Tensor(X_train)
 
-#######################
-# Build vectorized validation dataset
-#######################
-label_validation_list = np.array([elem[1] for elem in validation])
+    #######################
+    # Build vectorized validation dataset
+    #######################
+    label_validation_list = np.array([elem[1] for elem in validation])
 
-# y outputs
-label_encoder = LabelEncoder()
-int_encoded = label_encoder.fit_transform(label_validation_list)
+    # y outputs
+    label_encoder = LabelEncoder()
+    int_encoded = label_encoder.fit_transform(label_validation_list)
 
-ohe = OneHotEncoder(sparse=False)
-# ohe.fit(range(dataset_dict['num_labels']))
-int_encoded = int_encoded.reshape(len(int_encoded), 1)
-Y_val = torch.LongTensor(ohe.fit_transform(int_encoded))
+    ohe = OneHotEncoder(sparse=False)
+    # ohe.fit(range(dataset_dict['num_labels']))
+    int_encoded = int_encoded.reshape(len(int_encoded), 1)
+    Y_val = torch.LongTensor(ohe.fit_transform(int_encoded))
 
-# X
-X_val = np.zeros((len(validation), len(validation[0][0])))
-for i, elem in enumerate(validation):
-    X_val[i, :] = elem[0]
-X_val = torch.Tensor(X_val)
+    # X
+    X_val = np.zeros((len(validation), len(validation[0][0])))
+    for i, elem in enumerate(validation):
+        X_val[i, :] = elem[0]
+    X_val = torch.Tensor(X_val)
 
-formatted_training_dict = dict()
-formatted_training_dict['X_train'] = X_train
-formatted_training_dict['Y_train'] = Y_train
-formatted_training_dict['X_val'] = X_val
-formatted_training_dict['Y_val'] = Y_val
-formatted_dataset_path = os.path.abspath(r6_path + 'r6_formatted_dataset.pkl')
-with open(formatted_dataset_path, 'wb') as f:
-    pickle.dump(formatted_training_dict,f)
+    formatted_training_dict = dict()
+    formatted_training_dict['X_train'] = X_train
+    formatted_training_dict['Y_train'] = Y_train
+    formatted_training_dict['X_val'] = X_val
+    formatted_training_dict['Y_val'] = Y_val
+    with open(formatted_dataset_path, 'wb') as f:
+        pickle.dump(formatted_training_dict,f)
+
+else:
+    with open(formatted_dataset_path,'rb') as f:
+        formatted_training_dict = pickle.load(f)
+        X_train = formatted_training_dict['X_train']
+        Y_train = formatted_training_dict['Y_train']
+        X_val = formatted_training_dict['X_val']
+        Y_val = formatted_training_dict['Y_val']
+
+
+num_train = X_train.shape[0]
+num_val = X_val.shape[0]
 
 #######################
 # Building the model, encoding 128 vector
@@ -170,7 +183,7 @@ model = nn.Sequential(
     nn.ReLU(),
     nn.Linear(256, 128),
     nn.ReLU(),
-    nn.Linear(128, dataset_dict['num_labels']),
+    nn.Linear(128, 7),
     )
 
 loss_func = nn.CrossEntropyLoss()
@@ -178,9 +191,9 @@ loss_func = nn.CrossEntropyLoss()
 epochs = 5000
 lr = 0.1e-3
 minibatch_size = 32
-num_minibatches = int(len(training)/minibatch_size)
+num_minibatches = int(num_train/minibatch_size)
 
-weight_decay = 0.1
+weight_decay = 0.0
 step_size = 10
 gamma = 0.99
 optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
@@ -226,12 +239,12 @@ for epoch in range(epochs):
 
     # Get loss for whole batch
     yhat = model(x)
-    accuracy_vec.append(np.sum((torch.max(yhat, 1)[1] == torch.max(y, 1)[1]).data.numpy())/len(training))
+    accuracy_vec.append(np.sum((torch.max(yhat, 1)[1] == torch.max(y, 1)[1]).data.numpy())/num_train)
     loss = loss_func(yhat, torch.max(y, 1)[1])
     loss_vec.append(float(loss.data.numpy()))
     # track loss for validation set
     yvhat = model(xv)
-    vaccuracy_vec.append(np.sum((torch.max(yvhat, 1)[1] == torch.max(yv, 1)[1]).data.numpy())/len(validation))
+    vaccuracy_vec.append(np.sum((torch.max(yvhat, 1)[1] == torch.max(yv, 1)[1]).data.numpy())/num_val)
     vloss = loss_func(yvhat, torch.max(yv, 1)[1])
     vloss_vec.append(float(vloss.data.numpy()))
     # track learning rate

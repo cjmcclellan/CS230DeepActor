@@ -8,14 +8,25 @@ venv/
 refs/remotes/origin/master
 models/pretrained_facenet/
 models/triplet_loss/
-models/softmax/ridiculous6/
-
+models/softmax/ridiculous6/*
+!models/softmax/ridiculous6/1915/
+models/softmax/ridiculous6/1915/*
+!models/softmax/ridiculous6/1915/epoch2500.pkl
+!models/softmax/ridiculous6/1915/model_description.txt
+!models/softmax/ridiculous6/1915/model_performance.pkl
 
 # training data
 src/train_data/FaceID/
 train_data/Triplet_Loss/
-train_data/FaceID/
-train_data/Ridiclous_6/
+train_data/FaceID/The_Ridiculous_6_2015_movie/downloaded/
+train_data/FaceID/The_Ridiculous_6_2015_movie/face/
+train_data/FaceID/The_Ridiculous_6_2015_movie/flattened/
+train_data/FaceID/The_Ridiculous_6_2015_movie/raw/
+train_data/FaceID/The_Ridiculous_6_2015_movie/extra/downloaded/
+train_data/FaceID/The_Ridiculous_6_2015_movie/extra/face/
+train_data/FaceID/The_Ridiculous_6_2015_movie/extra/flattened/
+train_data/FaceID/The_Ridiculous_6_2015_movie/extra/raw/
+train_data/FaceID/The_Ridiculous_6_2015_movie/extra/r6_dataset.pkl
 
 # test data
 test_data/ridiculous6/screenshot/

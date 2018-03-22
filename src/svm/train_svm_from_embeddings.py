@@ -44,3 +44,4 @@ model_location = os.path.join(model_dir, 'svm_model.pkl')
 with open(model_location, 'wb') as f:
     pickle.dump(classifier, f)
 
+print('SVC Model Trained! Model is stored in', model_location)

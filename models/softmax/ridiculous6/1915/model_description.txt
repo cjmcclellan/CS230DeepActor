@@ -1,0 +1,1 @@
+{"scheduler_gamma": 0.99, "scheduler_step_rate": 10, "weight_decay": 0}
