@@ -24,17 +24,30 @@ import gender_guesser.detector as gender
 
 # paths for saving data
 #saved_data_path = '/home/connor/Dropbox/CS230/Data'
+#
+# pretrained_model = '../../models/pretrained_facenet/20170512-110547'
+# data_path = '../../train_data/Triplet_Loss/Movie_Triplets/Baseline'
+#
+# embeddings_path ='../../train_data/Triplet_Loss/Movie_Triplets/Embeddings/1521501363.9522028/Embeddings_at_1521501363.9522028'
+# #embeddings_path = '/home/connor/Documents/CS230/CS230DeepActor/train_data/Triplet_Loss/Movie_Triplets/Embeddings/1521394841.7290642/Embeddings_at_1521394841.7290642'
+#
+# # ridic 6 paths
+# test_data_path = '../../test_data/ridiculous6/r6_testset.pkl'
+# ridic_char_path = '../../train_data/Ridiclous_6/flattened/'
+# ridic_embeddings_path = '../../train_data/Ridiclous_6/embeddings/1521513956.7939253'
 
+
+## Paths for small training set ##
 pretrained_model = '../../models/pretrained_facenet/20170512-110547'
-data_path = '../../train_data/Triplet_Loss/Movie_Triplets/Baseline'
-
-embeddings_path ='../../train_data/Triplet_Loss/Movie_Triplets/Embeddings/1521501363.9522028/Embeddings_at_1521501363.9522028'
-#embeddings_path = '/home/connor/Documents/CS230/CS230DeepActor/train_data/Triplet_Loss/Movie_Triplets/Embeddings/1521394841.7290642/Embeddings_at_1521394841.7290642'
+data_path = '../../triplet_loss_data/Baseline'
+embeddings_path ='../../triplet_loss_data/Embeddings_at_1521501363.9522028'
 
 # ridic 6 paths
 test_data_path = '../../test_data/ridiculous6/r6_testset.pkl'
 ridic_char_path = '../../train_data/Ridiclous_6/flattened/'
-ridic_embeddings_path = '../../train_data/Ridiclous_6/embeddings/1521513956.7939253'
+ridic_embeddings_path = '../../triplet_loss_data/1521513956.7939253'
+###
+
 character_to_id = {'Chico--Terry_Crews': 0, 'Danny--Luke_Wilson': 1, 'Herm--Jorge_Garcia': 2, 'Lil_Pete--Taylor_Lautner': 3,
                    'Ramon--Rob_Schneider': 4, 'Tommy--Adam_Sandler': 5, 'Will_Patch--Will_Forte':6}
 
@@ -319,7 +332,7 @@ layersSize = [256, 256]
 input_layer_size = 128
 margin = 12.0
 epochs = 500
-batch_size = 30
+batch_size = 2 # batch set to 2 for small data set, actually used 30 for training
 learning_rate = 10e-3
 gamma = 0.99
 step_size = 10
@@ -353,27 +366,8 @@ class TNet(torch.nn.Module):
         torch.nn.init.xavier_normal(self.lin2.weight.data)
         # torch.nn.init.xavier_normal(self.lin3.weight.data)
 
-# model_triplet = torch.nn.Sequential(
-#     torch.nn.BatchNorm1d(input_layer_size),
-#     torch.nn.Linear(input_layer_size, layersSize[0]),
-#     torch.nn.ReLU(),
-#     torch.nn.Linear(layersSize[0], layersSize[1]),
-#     torch.nn.ReLU()
-# )
-
-# loss_fun = torch.nn.TripletMarginLoss(margin=margin)
-# optimizer = torch.optim.Adam(model_triplet.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
 ### Define the variables ###
-
-
-# def main():
-
-# first get all the embeddings and save them
-# encoder = Encoding_Model(pretrained_model)  # get the encoder
-# embeddings = encoder.generate_all_embeddings(data_path) # now get all the embeddings
-# current_time = str(time.time())
-# encoder.saveEmbeddings(embeddings_path + '/' + current_time, embeddings, 'Embeddings_at_' + current_time)
 
 # next, load the embeddings
 encoder = Encoding_Model()
@@ -382,10 +376,8 @@ embeddings = encoder.loadEmbeddings(embeddings_path)
 # Now train the NN
 
 model = TNet(input_layer_size)
-# torch.nn.init.xavier_normal(model[1].weight.data)
-# torch.nn.init.xavier_normal(model[3].weight.data)
+
 tripletTaker = Triplet_NN(model)
-#model.weight_initializer()  # initialize the variables
 loss_fun = torch.nn.TripletMarginLoss(margin=margin)
 model.init_weights()
 test_results = []
@@ -401,15 +393,6 @@ optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, weight_decay=w
 
 # Split the data into test and train
 train_embeddings, test_embeddings = tripletTaker.create_test_train_sets(embeddings, 0.75)
-
-# Get the first test results
-# test_results.append(tripletTaker.test_model(test_embeddings))
-# accuracy = float(sum(test_results[-1][0]))/float(len(test_results[-1][0]))
-# accuracy_vec.append(accuracy)
-# print('the test accuracy is :')
-# print(accuracy)
-# print('')
-
 
 for i_epoch in range(epochs):
     model.train()
@@ -490,9 +473,9 @@ pyplt.show()
 # pkl.dump(loss_vec, open(saved_data_path + '/' + 'loss_vec' + str(currenttime), 'wb'))
 # pkl.dump(val_loss, open(saved_data_path + '/' + 'val_loss_vec' + str(currenttime), 'wb'))
 
-tripletTaker.test_ridic6(model)
-# print(np.subtract(test_results[0][-1],test_results[-1][-1]))
-#
 
+### Uncomment to run the testing to ridiculous 6 ######
+#tripletTaker.test_ridic6(model)
+####################
 
 

@@ -15,6 +15,7 @@ models/softmax/ridiculous6/
 src/train_data/FaceID/
 train_data/Triplet_Loss/
 train_data/FaceID/
+train_data/Ridiclous_6/
 
 # test data
 test_data/ridiculous6/screenshot/
