@@ -6,7 +6,8 @@ Thie project is completed and can identify actors from the Ridiculous 6 movie us
 # Main Code
   
   ###### Triplet Loss
-  The triplet loss training py file is in the /src/triplet_loss directory under the file name "Triplet_Loss_TrainingNN(maincode).py".  The code requires the training data and test data to run.
+  The triplet loss training py file is in the /src/triplet_loss directory under the file name "Triplet_Loss_TrainingNN(maincode).py".  The code can run after downloading from github, but only using 3 training examples (250 examples were used for actually training, but the file size was too large for uploading to github)
+
 
 # Example Code
 For the project Milestone, the running code is "multi_image_face_recognition_demo.py" and "face_ID_demo.py", under the src directory.  multi_image_face_recognition_demo.py will detecte faces in 6 example images from the WIDER database and face_ID_demo.py will identify Nick Offerman and Rhetta from an image, serving as the baseline for this project
