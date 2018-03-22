@@ -9,6 +9,8 @@
 # 2.
 
 import tensorflow as tf
+import torch
+from torch.autograd import Variable
 import facenet.src.facenet as facenet
 import facenet.contributed.face as face
 import imageio
@@ -17,6 +19,7 @@ import os
 import numpy as np
 import time
 import random
+import matplotlib.pyplot as pyplt
 
 pretrained_model = '/home/connor/Documents/CS230/CS230DeepActor/models/pretrained_facenet/20170512-110547'
 data_path = '/home/connor/Documents/CS230/CS230DeepActor/train_data/Triplet_Loss/Movie_Triplets/Baseline'
@@ -79,36 +82,32 @@ class Encoding_Model:
 
 # This class will be an NN to map the encodings to face comparrison
 class Triplet_NN:
-    def __init__(self, input_shape, margin, learning_rate):
-        self.sess = tf.Session()
-        self.anchor = tf.placeholder(tf.float32, shape=[None,input_shape], name='anchor')
-        self.positive = tf.placeholder(tf.float32, shape=[None, input_shape], name='positive')
-        self.negative = tf.placeholder(tf.float32, shape=[None, input_shape], name='negative')
+    def __init__(self, input_shape, margin, learning_rate):#, weight_decay):
+        self.model = self.NN_architecutre(input_shape)
+        #self.loss_fun = torch.nn.MSELoss()
+        self.loss_fun = torch.nn.TripletMarginLoss(margin=margin)
+        self.optimizer = torch.optim.Adam(self.model.parameters(), lr=learning_rate)#, weight_decay=weight_decay)
 
-        self.anchorOut = self.NN_architecutre(self.anchor)
-        self.positiveOut = self.NN_architecutre(self.positive)
-        self.negativeOut = self.NN_architecutre(self.negative)
-        self.loss = self.triplet_loss(self.anchorOut, self.positiveOut, self.negativeOut, margin)
-        self.optimizer = tf.train.AdamOptimizer(learning_rate).minimize(self.loss, global_step=tf.Variable(batch_size))
+    def weight_initializer(self):
+        torch.nn.init.xavier_normal(self.model[1].weight.data)
+        torch.nn.init.xavier_normal(self.model[3].weight.data)
+        # torch.nn.init.xavier_normal(self.model[5].weight.data)
 
-    def global_initializer(self):
-        init = tf.global_variables_initializer()
-        self.sess.run(init)
 
     # This will compute the embeddings of the triplet model
-    def get_all_triplet_embeddings(self, embeddings, which_model):
+    def get_all_triplet_embeddings(self, embeddings):
         triplet_embed = {} # record the embeddings
+        self.model.train(False) # turn training off to run one example
         for actor in embeddings.keys(): # look through all the actors
             triplet_embed[actor] = {}
             for face in embeddings[actor].items(): # look through the faces of each actor
                 # get the embeddings of the actor's face
-                if which_model == 'anchor':
-                    triplet_embed[actor][face[0]] = self.sess.run(self.anchorOut,
-                                                            feed_dict={'anchor:0': np.reshape(face[1], [1,face[1].shape[0]])})
-                elif which_model == 'positive':
-                    triplet_embed[actor][face[0]] = self.sess.run(self.positiveOut,
-                                                            feed_dict={'positive:0': np.reshape(face[1], [1, face[1].shape[0]])})
+                testing = np.reshape(face[1], [1, face[1].shape[0]])
+
+                triplet_embed[actor][face[0]] = self.model(Variable(torch.Tensor(testing))).data.numpy()[0]
+
         # return the computed embeddings
+        self.model.train(True) #turn training back on
         return triplet_embed
 
     # compute the L2 norm
@@ -119,14 +118,14 @@ class Triplet_NN:
     def test_model(self, embeddings):
         final_results = []
         prediction_results  = []
-        triplet_embed_an = self.get_all_triplet_embeddings(embeddings, 'anchor') # for the anchor
-        triplet_embed_pos = self.get_all_triplet_embeddings(embeddings, 'anchor') # for the positive
-        for actor in triplet_embed_an.keys(): # look at all the actors
+        triplet_embed = self.get_all_triplet_embeddings(embeddings) # for the anchor
+        #triplet_embed_pos = self.get_all_triplet_embeddings(embeddings, 'anchor') # for the positive
+        for actor in triplet_embed.keys(): # look at all the actors
             actor_results = []
-            actor_faces = list(triplet_embed_an[actor].items()) # get a list of the actors faces
+            actor_faces = list(triplet_embed[actor].items()) # get a list of the actors faces
             actor_face = actor_faces[0]
-            for character in triplet_embed_pos.keys(): # look at all the characters
-                character_faces = list(triplet_embed_pos[character].items()) # get the character's faces
+            for character in triplet_embed.keys(): # look at all the characters
+                character_faces = list(triplet_embed[character].items()) # get the character's faces
                 character_face = character_faces[0] # just take the first character face
                 if character_face[0] == actor_face[0]:  # ensure that the character and actor face are not the same
                     character_face = character_faces[1] # if so, take the second face
@@ -146,22 +145,26 @@ class Triplet_NN:
 
 
     # Create the NN architecture
-    def NN_architecutre(self, placeholder):
-        dense1 = tf.contrib.layers.fully_connected(inputs=placeholder, num_outputs=layersSize[0])
-        output = tf.contrib.layers.fully_connected(inputs=dense1, num_outputs=layersSize[1])
+    def NN_architecutre(self, input_size):
+        model_triplet = torch.nn.Sequential(
+            torch.nn.BatchNorm1d(input_size),
+            torch.nn.Linear(input_layer_size, layersSize[0]),
+            torch.nn.ReLU(),
+            torch.nn.Linear(layersSize[0], layersSize[1]),
+            torch.nn.ReLU()
+        )
 
-
-        return output
+        return model_triplet
 
     # preform the triplet loss
-    def triplet_loss(self, anchor, positive, negative, alpha):
-        with tf.name_scope('triplet_loss'):
-            pos_dis = tf.reduce_sum(tf.square(anchor - positive), 1) # compute postive distance
-            neg_dis = tf.reduce_sum(tf.square(anchor - negative), 1) # compute negative distance
-            loss = tf.maximum(0.0, tf.add(alpha, tf.subtract(pos_dis,neg_dis))) # take the max of 0 or the distance to prevent negative loss
-            #loss = (alpha + pos_dis - neg_dis)  # take the max of 0 or the distance to prevent negative loss
-            loss = tf.reduce_mean(loss) # take the mean loss
-            return loss
+    # def triplet_loss(self, anchor, positive, negative, alpha):
+    #     with tf.name_scope('triplet_loss'):
+    #         pos_dis = tf.reduce_sum(tf.square(anchor - positive), 1) # compute postive distance
+    #         neg_dis = tf.reduce_sum(tf.square(anchor - negative), 1) # compute negative distance
+    #         loss = tf.maximum(0.0, alpha + pos_dis - neg_dis) # take the max of 0 or the distance to prevent negative loss
+    #         #loss = (alpha + pos_dis - neg_dis)  # take the max of 0 or the distance to prevent negative loss
+    #         loss = tf.reduce_mean(loss) # take the mean loss
+    #         return loss
 
     # This function can become more complicated, but for now just choose randomly
     def choose_triplets(self, embeddings):
@@ -187,17 +190,36 @@ class Triplet_NN:
         negative_face = list(negative_faces.items())[i_negative_face][1]
         return (anchor_actor, anchor_face), (anchor_actor, positive_face), (negative_actor, negative_face)
 
-# Build the NN model
+
+##########################
+## Build the NN model ##
+##########################
 
 
 # train the NN model
 # Some Hyperparameters
-layersSize = [2000, 3000]
+layersSize = [128, 256]
 input_layer_size = 128
-margin = 0.5
-epochs = 100
-batch_size = 30
-learning_rate = 5e-6
+margin = 5.0
+epochs = 1000
+batch_size = 20
+learning_rate = 1e-2
+weight_decay = 0.1
+
+
+# model_triplet = torch.nn.Sequential(
+#     torch.nn.BatchNorm1d(input_layer_size),
+#     torch.nn.Linear(input_layer_size, layersSize[0]),
+#     torch.nn.ReLU(),
+#     torch.nn.Linear(layersSize[0], layersSize[1]),
+#     torch.nn.ReLU()
+# )
+
+# loss_fun = torch.nn.TripletMarginLoss(margin=margin)
+# optimizer = torch.optim.Adam(model_triplet.parameters(), lr=learning_rate, weight_decay=weight_decay)
+
+### Define the variables ###
+
 
 # def main():
 
@@ -212,22 +234,27 @@ encoder = Encoding_Model()
 embeddings = encoder.loadEmbeddings(embeddings_path)
 
 # Now train the NN
-model = Triplet_NN(input_layer_size, margin, learning_rate)  # create the NN
-model.global_initializer() # initialize the variables
+model = Triplet_NN(input_layer_size, margin, learning_rate)#, weight_decay)  # create the NN
+model.weight_initializer() # initialize the variables
+# loss_fun = torch.nn.TripletMarginLoss(margin=margin)
+# optimizer = torch.optim.Adam(model.model.parameters(), lr=learning_rate, weight_decay=weight_decay)
+
 test_results = []
-test_results.append(model.test_model(embeddings))
-accuracy = float(sum(test_results[-1][0]))/float(len(test_results[-1][0]))
-print('the accuracy is :')
-print(accuracy)
-print('')
+loss_vec = []
+#test_results.append(model.test_model(embeddings))
+#accuracy = float(sum(test_results[-1][0]))/float(len(test_results[-1][0]))
+# print('the accuracy is :')
+# print(accuracy)
+# print('')
 # print(tf.all_variables())
 #print(tf.get_variable('fully_connected_1/weights:0'))
 
 ## Notes:
 ## I don't think my network is right, i need to make one network and have placeholders for the loss
 ## I can then recompute the loss each epoch
-for i_epoch in range(epochs):
 
+for i_epoch in range(epochs):
+    model.model.train()
     # clear the past minibatches
     anchor_minibatch = []
     positive_minibatch = []
@@ -240,26 +267,54 @@ for i_epoch in range(epochs):
         anchor_minibatch.append(anchor[1])
         positive_minibatch.append(positive[1])
         negative_minibatch.append(negative[1])
+        # save the first ones for comparing later
+        # if i_batch == 0:
+        #     save_inputan = anchor[1]
+        #     save_inputpos = positive[1]
+        #     save_inputneg = negative[1]
 
-    anchor_minibatch = np.array(anchor_minibatch)
-    positive_minibatch = np.array(positive_minibatch)
-    negative_minibatch = np.array(negative_minibatch)
-    feed_dict = {'anchor:0': anchor_minibatch, 'positive:0': positive_minibatch, 'negative:0': negative_minibatch}
+    anchor_minibatch = Variable(torch.Tensor(np.array(anchor_minibatch)))
+    positive_minibatch = Variable(torch.Tensor(np.array(positive_minibatch)))
+    negative_minibatch = Variable(torch.Tensor(np.array(negative_minibatch)))
     # now run the model with the optimizer and the loss
-    _, loss = model.sess.run([model.optimizer, model.loss], feed_dict=feed_dict)
-    print(loss)
+
+    model_output_anchor = model.model(anchor_minibatch)
+    model_output_positive = model.model(positive_minibatch)
+    model_output_negative = model.model(negative_minibatch)
+
+    # get the numpy data
+    # anchor1 = model_output_anchor.data.numpy()[0]
+    # if i_epoch == 0:# use this for comparing the change in outputs
+    #     save_anchor1 = anchor1
+
+    # positive1 = model_output_positive.data.numpy()[0]
+    # negative1 = model_output_negative.data.numpy()[0]
+
+    loss = model.loss_fun(model_output_anchor, model_output_positive, model_output_negative)
+    model.model.zero_grad()
+    loss.backward()
+    model.optimizer.step()
+    loss_vec.append(float(loss.data))
+    print('Loss: ' + str(float(loss.data)))
+    #print(model_output_anchor)
 
     # do a test of the model
-    if i_epoch%100 == 0:
-        test_results.append(model.test_model(embeddings))
-        accuracy = float(sum(test_results[-1][0]))/float(len(test_results[-1][0]))
-        print('the accuracy is :')
-        print(accuracy)
+    if i_epoch%10 == 0:
+        # test_results.append(model.test_model(embeddings))
+        # accuracy = float(sum(test_results[-1][0]))/float(len(test_results[-1][0]))
+        # print('the accuracy is :')
+        # print(accuracy)
         print('')
-testing = tf.all_variables()
-print(test_results[0][-1])
-print(test_results[-1][-1])
+        # print(save_anchor1 - anchor1)
+        # save_anchor1 = anchor1
 
+# print(test_results[0][-1])
+# print(test_results[-1][-1])
+
+pyplt.plot(loss_vec)
+pyplt.show()
+# print(np.subtract(test_results[0][-1],test_results[-1][-1]))
+#
 
 
 

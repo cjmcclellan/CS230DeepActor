@@ -79,35 +79,46 @@ class Encoding_Model:
 
 # This class will be an NN to map the encodings to face comparrison
 class Triplet_NN:
-    def __init__(self, input_shape, margin, learning_rate):
-        self.sess = tf.Session()
-        self.anchor = tf.placeholder(tf.float32, shape=[None,input_shape], name='anchor')
-        self.positive = tf.placeholder(tf.float32, shape=[None, input_shape], name='positive')
-        self.negative = tf.placeholder(tf.float32, shape=[None, input_shape], name='negative')
+    def __init__(self, input_shape, margin):
 
-        self.anchorOut = self.NN_architecutre(self.anchor)
-        self.positiveOut = self.NN_architecutre(self.positive)
-        self.negativeOut = self.NN_architecutre(self.negative)
-        self.loss = self.triplet_loss(self.anchorOut, self.positiveOut, self.negativeOut, margin)
-        self.optimizer = tf.train.AdamOptimizer(learning_rate).minimize(self.loss, global_step=tf.Variable(batch_size))
+        self.sess = tf.Session()
+        self.input = tf.placeholder(tf.float32, shape=[None, input_shape], name='input')
+        # self.positive = tf.placeholder(tf.float32, shape=[None, input_shape], name='positive')
+        # self.negative = tf.placeholder(tf.float32, shape=[None, input_shape], name='negative')
+
+        self.output = self.NN_architecutre(self.input)
+        # self.anchorResult = self.output
+        # self.positiveResult = self.output
+        # self.negativeResult = self.output
+        self.anchorResult = tf.placeholder(tf.float32, shape=self.output.shape, name='anchor')
+        self.positiveResult = tf.placeholder(tf.float32, shape=self.output.shape, name='positive')
+        self.negativeResult = tf.placeholder(tf.float32, shape=self.output.shape, name='negative')
+        # self.positiveOut = self.NN_architecutre(self.positive)
+        # self.negativeOut = self.NN_architecutre(self.negative)
+        self.loss = self.triplet_loss(self.anchorResult, self.positiveResult, self.negativeResult, margin)
 
     def global_initializer(self):
         init = tf.global_variables_initializer()
         self.sess.run(init)
 
+    # get the triplet loss
+    # def get_loss(self, anchor, positive, negative):
+    #     self.loss = self.triplet_loss(anchor, positive, negative, margin)
+
+    # create a new optimizer
+    def get_optimizer(self, learning_rate):
+        self.optimizer = tf.train.AdamOptimizer(learning_rate).minimize(self.loss, global_step=tf.Variable(batch_size))
+
+
     # This will compute the embeddings of the triplet model
-    def get_all_triplet_embeddings(self, embeddings, which_model):
+    def get_all_triplet_embeddings(self, embeddings):
         triplet_embed = {} # record the embeddings
         for actor in embeddings.keys(): # look through all the actors
             triplet_embed[actor] = {}
             for face in embeddings[actor].items(): # look through the faces of each actor
                 # get the embeddings of the actor's face
-                if which_model == 'anchor':
-                    triplet_embed[actor][face[0]] = self.sess.run(self.anchorOut,
-                                                            feed_dict={'anchor:0': np.reshape(face[1], [1,face[1].shape[0]])})
-                elif which_model == 'positive':
-                    triplet_embed[actor][face[0]] = self.sess.run(self.positiveOut,
-                                                            feed_dict={'positive:0': np.reshape(face[1], [1, face[1].shape[0]])})
+                triplet_embed[actor][face[0]] = self.sess.run(self.output,
+                                                        feed_dict={'input:0': np.reshape(face[1], [1,face[1].shape[0]])})
         # return the computed embeddings
         return triplet_embed
 
@@ -119,14 +130,13 @@ class Triplet_NN:
     def test_model(self, embeddings):
         final_results = []
         prediction_results  = []
-        triplet_embed_an = self.get_all_triplet_embeddings(embeddings, 'anchor') # for the anchor
-        triplet_embed_pos = self.get_all_triplet_embeddings(embeddings, 'anchor') # for the positive
-        for actor in triplet_embed_an.keys(): # look at all the actors
+        triplet_embed = self.get_all_triplet_embeddings(embeddings)
+        for actor in triplet_embed.keys(): # look at all the actors
             actor_results = []
-            actor_faces = list(triplet_embed_an[actor].items()) # get a list of the actors faces
+            actor_faces = list(triplet_embed[actor].items()) # get a list of the actors faces
             actor_face = actor_faces[0]
-            for character in triplet_embed_pos.keys(): # look at all the characters
-                character_faces = list(triplet_embed_pos[character].items()) # get the character's faces
+            for character in triplet_embed.keys(): # look at all the characters
+                character_faces = list(triplet_embed[character].items()) # get the character's faces
                 character_face = character_faces[0] # just take the first character face
                 if character_face[0] == actor_face[0]:  # ensure that the character and actor face are not the same
                     character_face = character_faces[1] # if so, take the second face
@@ -134,7 +144,7 @@ class Triplet_NN:
             if actor == 'Alfred--Michael_Caine':
                 save_actorembed = actor_face
             # after comparing with the other characters, save the best 5
-            final_results.append(sorted(actor_results, key=lambda x:x[1])[0:4])
+            final_results.append(sorted(actor_results, key=lambda x: x[1])[0:4])
 
             # check if the result was correct
             if final_results[-1][0][0] == actor:
@@ -144,22 +154,20 @@ class Triplet_NN:
         return (prediction_results, final_results, save_actorembed)
 
 
-
     # Create the NN architecture
     def NN_architecutre(self, placeholder):
-        dense1 = tf.contrib.layers.fully_connected(inputs=placeholder, num_outputs=layersSize[0])
-        output = tf.contrib.layers.fully_connected(inputs=dense1, num_outputs=layersSize[1])
-
-
+        dense1 = tf.layers.dense(inputs=placeholder, units=layersSize[0], activation=tf.nn.relu,
+                                     kernel_initializer=tf.contrib.layers.xavier_initializer(0))
+        output = tf.layers.dense(inputs=dense1, units=layersSize[1], activation=tf.nn.relu,
+                                      kernel_initializer=tf.contrib.layers.xavier_initializer(0))
         return output
 
     # preform the triplet loss
     def triplet_loss(self, anchor, positive, negative, alpha):
         with tf.name_scope('triplet_loss'):
-            pos_dis = tf.reduce_sum(tf.square(anchor - positive), 1) # compute postive distance
+            pos_dis = tf.reduce_sum(tf.square(anchor - positive), 1) # compute positive distance
             neg_dis = tf.reduce_sum(tf.square(anchor - negative), 1) # compute negative distance
-            loss = tf.maximum(0.0, tf.add(alpha, tf.subtract(pos_dis,neg_dis))) # take the max of 0 or the distance to prevent negative loss
-            #loss = (alpha + pos_dis - neg_dis)  # take the max of 0 or the distance to prevent negative loss
+            loss = tf.maximum(0.0, tf.add(alpha, tf.subtract(pos_dis, neg_dis))) # take the max of 0 or the distance to prevent negative loss
             loss = tf.reduce_mean(loss) # take the mean loss
             return loss
 
@@ -183,21 +191,19 @@ class Triplet_NN:
         i_negative_face = random.randint(0, len(negative_faces) - 1)
         # Now grap the face embeddings (the second element in the items)
         anchor_face = list(anchor_faces.items())[i_anchor_face][1]
-        positive_face = list(anchor_faces.items())[i_positive_face][1]
+        positive_face = list(anchor_faces.items())[i_anchor_face][1]
         negative_face = list(negative_faces.items())[i_negative_face][1]
         return (anchor_actor, anchor_face), (anchor_actor, positive_face), (negative_actor, negative_face)
 
-# Build the NN model
-
-
 # train the NN model
 # Some Hyperparameters
-layersSize = [2000, 3000]
+layersSize = [1028, 1028]
+last_layer_size = layersSize[1]
 input_layer_size = 128
-margin = 0.5
-epochs = 100
-batch_size = 30
-learning_rate = 5e-6
+margin = 1.0
+epochs = 1000
+batch_size = 20
+learning_rate = 1e-5
 
 # def main():
 
@@ -212,16 +218,15 @@ encoder = Encoding_Model()
 embeddings = encoder.loadEmbeddings(embeddings_path)
 
 # Now train the NN
-model = Triplet_NN(input_layer_size, margin, learning_rate)  # create the NN
+model = Triplet_NN(input_layer_size, margin)  # create the NN
 model.global_initializer() # initialize the variables
+# model.get_optimizer(learning_rate)  # create the optimizer
 test_results = []
 test_results.append(model.test_model(embeddings))
 accuracy = float(sum(test_results[-1][0]))/float(len(test_results[-1][0]))
 print('the accuracy is :')
 print(accuracy)
 print('')
-# print(tf.all_variables())
-#print(tf.get_variable('fully_connected_1/weights:0'))
 
 ## Notes:
 ## I don't think my network is right, i need to make one network and have placeholders for the loss
@@ -244,22 +249,26 @@ for i_epoch in range(epochs):
     anchor_minibatch = np.array(anchor_minibatch)
     positive_minibatch = np.array(positive_minibatch)
     negative_minibatch = np.array(negative_minibatch)
+
+    # now run the anchor, positive and negative
+    anchorResult = model.sess.run(model.output, feed_dict={'input:0': anchor_minibatch})
+    positiveResult = model.sess.run(model.output, feed_dict={'input:0': positive_minibatch})
+    negativeResult = model.sess.run(model.output, feed_dict={'input:0': negative_minibatch})
+    # print(tf.trainable_variables())
+    #model.get_loss(model.anchorResult, model.positiveResult, model.negativeResult)
+    model.get_optimizer(learning_rate)  # create the optimizer
     feed_dict = {'anchor:0': anchor_minibatch, 'positive:0': positive_minibatch, 'negative:0': negative_minibatch}
     # now run the model with the optimizer and the loss
+
     _, loss = model.sess.run([model.optimizer, model.loss], feed_dict=feed_dict)
     print(loss)
 
     # do a test of the model
-    if i_epoch%100 == 0:
+    if i_epoch%5 == 0:
         test_results.append(model.test_model(embeddings))
         accuracy = float(sum(test_results[-1][0]))/float(len(test_results[-1][0]))
         print('the accuracy is :')
         print(accuracy)
         print('')
-testing = tf.all_variables()
-print(test_results[0][-1])
-print(test_results[-1][-1])
-
-
 
 

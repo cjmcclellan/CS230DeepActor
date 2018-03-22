@@ -34,25 +34,25 @@ class Encoder:
         # Run forward pass to calculate embeddings
         feed_dict = {images_placeholder: [prewhiten_face], phase_train_placeholder: False}
         return self.sess.run(embeddings, feed_dict=feed_dict)[0]
-
-# This class will be used to test models
-class Testing_Class:
-    def __init__(self, model_path = None, model = None, test_examples = None, input_name, model_output):
-        # save the input and output names
-        self.input_name = input_name
-        self.model_output = model_output
-        # Check if the user inputs model path or a model
-        if model_path is not None:
-            # add code to import model
-            self.model = None
-        else:
-            self.model = model
-
-        self.test_examp = test_examples
-
-    # This function will run the model and output the embeddings
-    def gen_embeddings(self, input_face):
-        return self.model.sess.run(self.model_output, feed_dict={self.input_name: input_face})
+#
+# # This class will be used to test models
+# class Testing_Class:
+#     def __init__(self, model_path = None, model = None, test_examples = None, input_name, model_output):
+#         # save the input and output names
+#         self.input_name = input_name
+#         self.model_output = model_output
+#         # Check if the user inputs model path or a model
+#         if model_path is not None:
+#             # add code to import model
+#             self.model = None
+#         else:
+#             self.model = model
+#
+#         self.test_examp = test_examples
+#
+#     # This function will run the model and output the embeddings
+#     def gen_embeddings(self, input_face):
+#         return self.model.sess.run(self.model_output, feed_dict={self.input_name: input_face})
 
 ## My new class for triplet identifier
 class TripRecognition:
