@@ -5,7 +5,7 @@ Thie project is completed and can identify actors from the Ridiculous 6 movie us
 
 # Main Code
   
-  ######Triplet Loss
+  ###### Triplet Loss
   The triplet loss training py file is in the /src/triplet_loss directory under the file name "Triplet_Loss_TrainingNN(maincode).py".  The code requires the training data and test data to run.
 
 # Example Code
