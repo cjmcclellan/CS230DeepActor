@@ -121,7 +121,7 @@ def main(movie_name, val, num_actors, num_images):
     # Start Building the database
     #
     # Connor adjusted the path for his computer !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    output_root = '/home/connor/Documents/CS230/CS230DeepActor/train_data/FaceID/'
+    output_root = '/home/connor/Documents/Stanford_Classes/CS230/CS230DeepActor/train_data/FaceID/'
     movie_dir = output_root + '_'.join(movie['title'].split() + [str(movie['year'])] + [str(movie['kind'])]) + '/'
     downloads_dir = movie_dir + 'downloaded/'
     raw_dir = movie_dir + 'raw/'
@@ -150,6 +150,7 @@ def main(movie_name, val, num_actors, num_images):
         query_dir = downloads_dir + '\"{}\"'.format(query)
 
         print('\nDownloading {} images for {}'.format(str(num_images), movie['cast'][i]['name']))
+        print(os.getcwd())
         subprocess.check_output(
             ['googleimagesdownload', '-k', '\"{}\"'.format(query), '-l', str(num_images), '-o', downloads_dir, '-f',
              'jpg', '-s','medium'])

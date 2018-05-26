@@ -21,6 +21,7 @@ import time
 import random
 import matplotlib.pyplot as pyplt
 import gender_guesser.detector as gender
+from CS230DeepActor.src.triplet_loss.TNet_file import TNet
 
 # paths for saving data
 #saved_data_path = '/home/connor/Dropbox/CS230/Data'
@@ -41,6 +42,7 @@ import gender_guesser.detector as gender
 pretrained_model = '../../models/pretrained_facenet/20170512-110547'
 data_path = '../../triplet_loss_data/Baseline'
 embeddings_path ='../../triplet_loss_data/Embeddings_at_1521501363.9522028'
+save_model_path = '../../triplet_loss_data/triplet_model/'
 
 # ridic 6 paths
 test_data_path = '../../test_data/ridiculous6/r6_testset.pkl'
@@ -51,13 +53,13 @@ ridic_embeddings_path = '../../triplet_loss_data/1521513956.7939253'
 character_to_id = {'Chico--Terry_Crews': 0, 'Danny--Luke_Wilson': 1, 'Herm--Jorge_Garcia': 2, 'Lil_Pete--Taylor_Lautner': 3,
                    'Ramon--Rob_Schneider': 4, 'Tommy--Adam_Sandler': 5, 'Will_Patch--Will_Forte':6}
 
-
+print(torch.cuda.is_available())
 class Encoding_Model:
     def __init__(self, model_path=None):
+        self.detect = face.Detection()  # make a detector (using triple CNN)
         if model_path == None:
             return
         self.sess = tf.Session()
-        self.detect = face.Detection()  # make a detector (using triple CNN)
         with self.sess.as_default():
             facenet.load_model(model_path)
 
@@ -325,157 +327,164 @@ class Triplet_NN:
 ## Build the NN model ##
 ##########################
 
-
-# train the NN model
-# Some Hyperparameters
-layersSize = [256, 256]
-input_layer_size = 128
-margin = 12.0
-epochs = 500
-batch_size = 2 # batch set to 2 for small data set, actually used 30 for training
-learning_rate = 10e-3
-gamma = 0.99
-step_size = 10
-weight_decay = 1e-5
-
-
-class TNet(torch.nn.Module):
-
-    def __init__(self, input_size):
-        super(TNet, self).__init__()
-        self.batchNorm = torch.nn.BatchNorm1d(input_size)
-        self.lin1 = torch.nn.Linear(input_size, layersSize[0])
-        self.relu1 = torch.nn.ReLU()
-        self.lin2 = torch.nn.Linear(layersSize[0], layersSize[1])
-        self.relu2 = torch.nn.ReLU()
-        # self.lin3 = torch.nn.Linear(layersSize[1], layersSize[2])
-        # self.relu3 = torch.nn.ReLU()
-
-    def forward(self, x):
-        x = self.batchNorm(x)
-        x = self.lin1(x)
-        x = self.relu1(x)
-        x = self.lin2(x)
-        x = self.relu2(x)
-        # x = self.lin3(x)
-        # x = self.relu3(x)
-        return x
-
-    def init_weights(self):
-        torch.nn.init.xavier_normal(self.lin1.weight.data)
-        torch.nn.init.xavier_normal(self.lin2.weight.data)
-        # torch.nn.init.xavier_normal(self.lin3.weight.data)
-
-
-### Define the variables ###
-
-# next, load the embeddings
-encoder = Encoding_Model()
-embeddings = encoder.loadEmbeddings(embeddings_path)
-
-# Now train the NN
-
-model = TNet(input_layer_size)
-
-tripletTaker = Triplet_NN(model)
-loss_fun = torch.nn.TripletMarginLoss(margin=margin)
-model.init_weights()
-test_results = []
-train_results = []
-loss_vec = []
-accuracy_vec = []
-train_accuracy_vec = []
-val_loss = []
-
-optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
-#scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=step_size, gamma=gamma)
+def main():
+    # train the NN model
+    # Some Hyperparameters
+    layersSize = [256, 256]
+    input_layer_size = 128
+    margin = 12.0
+    epochs = 100
+    batch_size = 2 # batch set to 2 for small data set, actually used 30 for training
+    learning_rate = 10e-3
+    gamma = 0.99
+    step_size = 10
+    weight_decay = 1e-5
+    #
+    #
+    # class TNet(torch.nn.Module):
+    #
+    #     def __init__(self, input_size):
+    #         super(TNet, self).__init__()
+    #         self.batchNorm = torch.nn.BatchNorm1d(input_size)
+    #         self.lin1 = torch.nn.Linear(input_size, layersSize[0])
+    #         self.relu1 = torch.nn.ReLU()
+    #         self.lin2 = torch.nn.Linear(layersSize[0], layersSize[1])
+    #         self.relu2 = torch.nn.ReLU()
+    #         # self.lin3 = torch.nn.Linear(layersSize[1], layersSize[2])
+    #         # self.relu3 = torch.nn.ReLU()
+    #
+    #     def forward(self, x):
+    #         x = self.batchNorm(x)
+    #         x = self.lin1(x)
+    #         x = self.relu1(x)
+    #         x = self.lin2(x)
+    #         x = self.relu2(x)
+    #         # x = self.lin3(x)
+    #         # x = self.relu3(x)
+    #         return x
+    #
+    #     def init_weights(self):
+    #         torch.nn.init.xavier_normal(self.lin1.weight.data)
+    #         torch.nn.init.xavier_normal(self.lin2.weight.data)
+    #         # torch.nn.init.xavier_normal(self.lin3.weight.data)
 
 
-# Split the data into test and train
-train_embeddings, test_embeddings = tripletTaker.create_test_train_sets(embeddings, 0.75)
+    ### Define the variables ###
 
-for i_epoch in range(epochs):
-    model.train()
-    #scheduler.step()
-    # clear the past minibatches
-    minibatch_loss = []
-    # get the anchor, positive and negative encodings.
-    #for i_batch in range(batch_size):
-    anchor_minibatch, positive_minibatch, negative_minibatch = tripletTaker.choose_minibatches(train_embeddings, batch_size)
+    # next, load the embeddings
+    encoder = Encoding_Model()
+    embeddings = encoder.loadEmbeddings(embeddings_path)
 
-    for i_minibatch, anchor_batch in enumerate(anchor_minibatch):
+    # Now train the NN
 
-        anchor_minibatch_input = Variable(torch.Tensor(np.array(anchor_minibatch[i_minibatch])))
-        positive_minibatch_input = Variable(torch.Tensor(np.array(positive_minibatch[i_minibatch])))
-        negative_minibatch_input = Variable(torch.Tensor(np.array(negative_minibatch[i_minibatch])))
-        # now run the model with the optimizer and the loss
-        optimizer.zero_grad()
+    model = TNet(input_layer_size)
 
-        model_output_anchor = model(anchor_minibatch_input)
-        model_output_positive = model(positive_minibatch_input)
-        model_output_negative = model(negative_minibatch_input)
+    tripletTaker = Triplet_NN(model)
+    loss_fun = torch.nn.TripletMarginLoss(margin=margin)
+    model.init_weights()
+    test_results = []
+    train_results = []
+    loss_vec = []
+    accuracy_vec = []
+    train_accuracy_vec = []
+    val_loss = []
 
-        loss = loss_fun(model_output_anchor, model_output_positive, model_output_negative)  # , model_output_negative)
-        loss.backward()
-        optimizer.step()
-        minibatch_loss.append(float(loss.data))
-    loss_vec.append(np.mean(minibatch_loss))
-
-    # do a test of the model
-    if i_epoch % 50 == 0 and i_epoch > 100:
-
-        test_results.append(tripletTaker.test_model(test_embeddings))
-        accuracy = float(sum(test_results[-1][0]))/float(len(test_results[-1][0]))
-        accuracy_vec.append(accuracy)
-        print('the test accuracy is :')
-        print(accuracy)
-        print('')
-        print('Epoch num is: ' + str(i_epoch))
-        print('')
-        train_results.append(tripletTaker.test_model(train_embeddings))
-        accuracy = float(sum(train_results[-1][0])) / float(len(train_results[-1][0]))
-        train_accuracy_vec.append(accuracy)
-
-    # get the valadation loss
-    anchor_minibatch, positive_minibatch, negative_minibatch = tripletTaker.choose_minibatches(test_embeddings,1)
-    temp_val_loss = []
-    for i_minibatch, anchor_batch in enumerate(anchor_minibatch):
-        model.train(False)  # turn training off to run one example
-
-        anchor_minibatch_input = Variable(torch.Tensor(np.array(anchor_minibatch[i_minibatch])))
-        positive_minibatch_input = Variable(torch.Tensor(np.array(positive_minibatch[i_minibatch])))
-        negative_minibatch_input = Variable(torch.Tensor(np.array(negative_minibatch[i_minibatch])))
-        model_output_anchor = model(anchor_minibatch_input)
-        model_output_positive = model(positive_minibatch_input)
-        model_output_negative = model(negative_minibatch_input)
-
-        loss = loss_fun(model_output_anchor, model_output_positive, model_output_negative)  # , model_output_negative)
-        temp_val_loss.append(float(loss.data))
-    val_loss.append(np.mean(temp_val_loss))
-    model.train(True)  # turn training off to run one example
+    optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
+    #scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=step_size, gamma=gamma)
 
 
-lossfig = pyplt.plot(loss_vec)
-pyplt.plot(val_loss)
-pyplt.xlabel('epoch')
-pyplt.ylabel('Loss')
-pyplt.show()
-accfig = pyplt.plot(accuracy_vec)
-pyplt.plot(train_accuracy_vec)
-pyplt.xlabel('epoch')
-pyplt.ylabel('Accuracy')
-pyplt.show()
+    # Split the data into test and train
+    train_embeddings, test_embeddings = tripletTaker.create_test_train_sets(embeddings, 0.75)
 
-# save the data
-# currenttime = time.time()
-# pkl.dump(accuracy_vec, open(saved_data_path + '/' + 'test_accuracy' + str(currenttime), 'wb'))
-# pkl.dump(train_accuracy_vec, open(saved_data_path + '/' + 'train_accuracy' + str(currenttime), 'wb'))
-# pkl.dump(loss_vec, open(saved_data_path + '/' + 'loss_vec' + str(currenttime), 'wb'))
-# pkl.dump(val_loss, open(saved_data_path + '/' + 'val_loss_vec' + str(currenttime), 'wb'))
+    for i_epoch in range(epochs):
+        model.train()
+        #scheduler.step()
+        # clear the past minibatches
+        minibatch_loss = []
+        # get the anchor, positive and negative encodings.
+        #for i_batch in range(batch_size):
+        anchor_minibatch, positive_minibatch, negative_minibatch = tripletTaker.choose_minibatches(train_embeddings, batch_size)
+
+        for i_minibatch, anchor_batch in enumerate(anchor_minibatch):
+
+            anchor_minibatch_input = Variable(torch.Tensor(np.array(anchor_minibatch[i_minibatch])))
+            positive_minibatch_input = Variable(torch.Tensor(np.array(positive_minibatch[i_minibatch])))
+            negative_minibatch_input = Variable(torch.Tensor(np.array(negative_minibatch[i_minibatch])))
+            # now run the model with the optimizer and the loss
+            optimizer.zero_grad()
+
+            model_output_anchor = model(anchor_minibatch_input)
+            model_output_positive = model(positive_minibatch_input)
+            model_output_negative = model(negative_minibatch_input)
+
+            loss = loss_fun(model_output_anchor, model_output_positive, model_output_negative)  # , model_output_negative)
+            loss.backward()
+            optimizer.step()
+            minibatch_loss.append(float(loss.data))
+        loss_vec.append(np.mean(minibatch_loss))
+
+        # do a test of the model
+        if i_epoch % 50 == 0 and i_epoch > 100:
+
+            test_results.append(tripletTaker.test_model(test_embeddings))
+            accuracy = float(sum(test_results[-1][0]))/float(len(test_results[-1][0]))
+            accuracy_vec.append(accuracy)
+            print('the test accuracy is :')
+            print(accuracy)
+            print('')
+            print('Epoch num is: ' + str(i_epoch))
+            print('')
+            train_results.append(tripletTaker.test_model(train_embeddings))
+            accuracy = float(sum(train_results[-1][0])) / float(len(train_results[-1][0]))
+            train_accuracy_vec.append(accuracy)
+
+        # get the valadation loss
+        anchor_minibatch, positive_minibatch, negative_minibatch = tripletTaker.choose_minibatches(test_embeddings,1)
+        temp_val_loss = []
+        for i_minibatch, anchor_batch in enumerate(anchor_minibatch):
+            model.train(False)  # turn training off to run one example
+
+            anchor_minibatch_input = Variable(torch.Tensor(np.array(anchor_minibatch[i_minibatch])))
+            positive_minibatch_input = Variable(torch.Tensor(np.array(positive_minibatch[i_minibatch])))
+            negative_minibatch_input = Variable(torch.Tensor(np.array(negative_minibatch[i_minibatch])))
+            model_output_anchor = model(anchor_minibatch_input)
+            model_output_positive = model(positive_minibatch_input)
+            model_output_negative = model(negative_minibatch_input)
+
+            loss = loss_fun(model_output_anchor, model_output_positive, model_output_negative)  # , model_output_negative)
+            temp_val_loss.append(float(loss.data))
+        val_loss.append(np.mean(temp_val_loss))
+        model.train(True)  # turn training off to run one example
 
 
-### Uncomment to run the testing to ridiculous 6 ######
-#tripletTaker.test_ridic6(model)
-####################
+    lossfig = pyplt.plot(loss_vec)
+    pyplt.plot(val_loss)
+    pyplt.xlabel('epoch')
+    pyplt.ylabel('Loss')
+    pyplt.show()
+    accfig = pyplt.plot(accuracy_vec)
+    pyplt.plot(train_accuracy_vec)
+    pyplt.xlabel('epoch')
+    pyplt.ylabel('Accuracy')
+    pyplt.show()
 
+    #### save the model ####
+    torch.save(model, save_model_path + 'tip_mod_1.pt')
+
+    loaded_model = torch.load(save_model_path + 'tip_mod_1.pt')
+    tripletTaker.test_ridic6(loaded_model)
+    # save the data
+    # currenttime = time.time()
+    # pkl.dump(accuracy_vec, open(saved_data_path + '/' + 'test_accuracy' + str(currenttime), 'wb'))
+    # pkl.dump(train_accuracy_vec, open(saved_data_path + '/' + 'train_accuracy' + str(currenttime), 'wb'))
+    # pkl.dump(loss_vec, open(saved_data_path + '/' + 'loss_vec' + str(currenttime), 'wb'))
+    # pkl.dump(val_loss, open(saved_data_path + '/' + 'val_loss_vec' + str(currenttime), 'wb'))
+
+
+    ### Uncomment to run the testing to ridiculous 6 ######
+    #tripletTaker.test_ridic6(model)
+    ####################
+
+## now run main
+#main()
 
