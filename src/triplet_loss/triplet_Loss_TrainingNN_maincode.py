@@ -68,6 +68,7 @@ class Encoding_Model:
         if imagepath is not None:
             image = imageio.imread(imagepath)
         face = self.detect.find_faces(image)
+        # one error is that I cannot convert an image with no face to a face object
         return face[0]  # return the only face in the image
 
     # This function will generate all the embeddings from the images in the path and return a dictionary with the
@@ -377,7 +378,7 @@ def main():
 
     # Now train the NN
 
-    model = TNet(input_layer_size)
+    model = TNet(input_layer_size, layersSize)
 
     tripletTaker = Triplet_NN(model)
     loss_fun = torch.nn.TripletMarginLoss(margin=margin)

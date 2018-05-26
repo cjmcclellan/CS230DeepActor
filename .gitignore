@@ -3,6 +3,7 @@
 # Virtual environments
 DeepLearning/
 venv/
+.env/
 
 # Models
 refs/remotes/origin/master
@@ -27,6 +28,7 @@ train_data/FaceID/The_Ridiculous_6_2015_movie/extra/face/
 train_data/FaceID/The_Ridiculous_6_2015_movie/extra/flattened/
 train_data/FaceID/The_Ridiculous_6_2015_movie/extra/raw/
 train_data/FaceID/The_Ridiculous_6_2015_movie/extra/r6_dataset.pkl
+train_data/
 
 # test data
 test_data/ridiculous6/screenshot/

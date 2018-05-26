@@ -25,6 +25,7 @@ class FaceDetector(object):
 
         self.id_model = torch.load(Id_model_path)
         self.detector = face.Detection()
+        self.image_size = self.detector.face_crop_size
         print('imported face detect')
         self.detector.threshold = threshold
         self.detector.minsize = minsize
@@ -59,7 +60,7 @@ class FaceDetector(object):
                 # check that the face id is not none
                 if face_id is not None:
                     for actor_name in ref_faces:
-                        if actor_name in face_id: # check if the reference actor is in the face id'd
+                        if actor_name.find(face_id) != -1: # check if the reference actor is in the face id'd
                             color = wanted_faces[actor_name]
                             print('############################## ' + actor_name + ' ###############################')
                             cv2.rectangle(frame, (id_face.bounding_box[0], id_face.bounding_box[1]), \
@@ -93,7 +94,9 @@ class FaceDetector(object):
                 best_match = actor_name
                 best_score = score
         print('#############')
-
+        # now remove the file extenstion from the name
+        period = best_match.find('.')
+        best_match = best_match[:period - 1]
         return best_match
 
 

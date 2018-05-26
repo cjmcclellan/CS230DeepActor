@@ -26,8 +26,8 @@ with open(movie_list_path) as movie_list_file:
 
 # Some "hyperparameters"
 movie_selection = 1 # always choose the first choice
-num_actors = 6  #
-num_images = 12 #
+num_actors = 8  #
+num_images = 20 #
 
 for movie in movie_list:
     # Run the build face database

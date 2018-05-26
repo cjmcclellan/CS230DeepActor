@@ -11,7 +11,7 @@ import pickle as pkl
 
 class TNet(torch.nn.Module):
 
-    def __init__(self, input_size):
+    def __init__(self, input_size, layersSize):
         super(TNet, self).__init__()
         self.batchNorm = torch.nn.BatchNorm1d(input_size)
         self.lin1 = torch.nn.Linear(input_size, layersSize[0])
