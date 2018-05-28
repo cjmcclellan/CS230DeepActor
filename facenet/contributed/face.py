@@ -114,6 +114,10 @@ class Encoder:
         feed_dict = {images_placeholder: [prewhiten_face], phase_train_placeholder: False}
         return self.sess.run(embeddings, feed_dict=feed_dict)[0]
 
+    # added by cjmcclellan to close the session and relases memory
+    def closeSess(self):
+        print('closing the session')
+        self.sess.close()
 
 class Detection:
     # face detection parameters

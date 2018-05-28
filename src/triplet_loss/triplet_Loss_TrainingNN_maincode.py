@@ -88,6 +88,13 @@ class Encoding_Model:
         # now return the embeddings
         return all_embeddings
 
+    # use this function to close the session
+    def closeSess(self):
+        tf.reset_default_graph()
+        self.sess.close()
+        del self.sess
+
+
     # This function will save the embeddings as a pickle
     def saveEmbeddings(self, pathtosave, embeddings, filename):
         if not os.path.exists(pathtosave):

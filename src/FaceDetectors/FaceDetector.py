@@ -36,6 +36,12 @@ class FaceDetector(object):
         self.ref_face = self.embeddings_model.imagetoface(imagepath=face_path)
         self.ref_face_embeddings = self.embeddings_model.generate_embedding(self.ref_face)
 
+# this will close the encoder session to relase memeory
+    def closeSess(self):
+        if self.doID:
+            self.embeddings_model.closeSess()
+            del self.embeddings_model
+        
     # give a path to actor faces in the video
     def actorsinVideo(self, pathtoactors):
         self.actor_embeddings = {}
@@ -55,7 +61,7 @@ class FaceDetector(object):
             # if we want to ID faces, then Id the faces
             if self.doID:
 
-                face_id = self.bestMatch(id_face, threshold) # get the best match to the face
+                face_id = self.bestMatch(id_face, threshold, ref_faces) # get the best match to the face
 
                 # check that the face id is not none
                 if face_id is not None:
@@ -78,26 +84,41 @@ class FaceDetector(object):
         return frame
 
     # this function will return the best match given the face (image) input
-    def bestMatch(self, face, threshold):
-        best_match = None
+    def bestMatch(self, face, threshold, ref_faces):
+        best_match = 'nothing'  # make the inital best match 'nothing'
         best_score = threshold
+        scores = {ref_face: [] for ref_face in ref_faces}  # get a dict of the scores
         face_embeddings = self.embeddings_model.generate_embedding(face)
         print('#############')
         # look through each actor embeddings
         for actor_name, actor_embeddings in self.actor_embeddings.items():
             score = self.L2Face(face_embeddings, actor_embeddings)
-
-            print(actor_name)
-            print(score)
-            print('')
-            if score < best_score:
-                best_match = actor_name
-                best_score = score
+            name = self.removeNum(actor_name)
+            if name not in list(scores.keys()):
+                scores[name] = []
+            scores[name].append(score)
+            # if score < best_score:
+            #     best_match = actor_name
+            #     best_score = score
         print('#############')
+        for actor_name, score in scores.items():
+            avg_score = sum(score)/len(score)
+            print(actor_name)
+            print(avg_score)
+            print('')
+            if avg_score > best_score:
+                best_match = actor_name
         # now remove the file extenstion from the name
         period = best_match.find('.')
         best_match = best_match[:period - 1]
         return best_match
+
+    # this function will remove numbers from the string
+    def removeNum(self, string):
+        temp = ''.join(i for i in string if not i.isdigit())
+        return temp
+        # period = temp.rfind('.')
+        # return temp[:period - 1]
 
 
     def L2Face(self, ref_face, id_face):
