@@ -8,7 +8,7 @@ import cv2
 
 movie_path = '/home/connor/Downloads/'
 movie_title = 'Solo_ AStarWarsStoryOfficialTrailer_5000_[0.2,0.3,0.3]'
-movie_type = '.mp4'
+movie_type = '.avi'
 
 
 
@@ -37,16 +37,17 @@ def main():
     frame_width = int(video.get(3))
     frame_height = int(video.get(4))
     fps = video.get(cv2.cv2.CAP_PROP_FPS)
-    fourcc = cv2.VideoWriter_fourcc(*'MJPG')
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
     out = cv2.VideoWriter(full_movie_path, fourcc, fps, (frame_width, frame_height))
 
     # now loop through all the movies and combine them
     for i in range(0, max_num):
         video = cv2.VideoCapture(os.path.join(movie_path, movies[i]))
-        success = True
+        success, frame = video.read()
         while success:
-            success, frame = video.read()
             out.write(np.array(frame))
+            success, frame = video.read()
+
 
 
         # new_part = skvideo.io.vread(os.path.join(movie_path, movies[i]))

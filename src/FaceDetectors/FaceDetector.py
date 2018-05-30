@@ -84,7 +84,7 @@ class FaceDetector(object):
         return frame
 
     # this function will return the best match given the face (image) input
-    def bestMatch(self, face, threshold, ref_faces):
+    def bestMatch(self, face, threshold, ref_faces, bestof = 3):
         best_match = 'nothing'  # make the inital best match 'nothing'
         best_score = threshold
         scores = {ref_face: [] for ref_face in ref_faces}  # get a dict of the scores
@@ -102,11 +102,12 @@ class FaceDetector(object):
             #     best_score = score
         print('#############')
         for actor_name, score in scores.items():
-            avg_score = sum(score)/len(score)
+            score.sort()
+            avg_score = sum(score[:bestof])/len(score[:bestof])
             print(actor_name)
             print(avg_score)
             print('')
-            if avg_score > best_score:
+            if avg_score < best_score: # mak sure the avg sorce is less than best score
                 best_match = actor_name
         # now remove the file extenstion from the name
         period = best_match.find('.')
